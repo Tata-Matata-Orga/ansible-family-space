@@ -1,6 +1,6 @@
 ---
 - name: Bastion as default gateway
-  hosts: control
+  hosts: bastion
   become: true
 
   vars:
