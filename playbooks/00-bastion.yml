@@ -3,6 +3,10 @@
   hosts: control
   become: true
 
+  collections:
+    - ansible.posix
+    - community.crypto
+    
   vars:
     private_iface: enp7s0
     public_iface: eth0
