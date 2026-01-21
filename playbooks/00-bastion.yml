@@ -21,7 +21,7 @@
     # IPv4 forwarding
     # -----------------------------
     - name: Enable IPv4 forwarding at runtime and persistently
-      ansible.posix.sysctl:
+      sysctl:
         name: net.ipv4.ip_forward
         value: "1"
         state: present
@@ -30,33 +30,60 @@
     # -----------------------------
     # IPTABLES NAT + forwarding
     # -----------------------------
-    - name: Enable NAT (MASQUERADE) on public interface
-      community.general.iptables:
-        table: nat
-        chain: POSTROUTING
-        out_interface: "{{ public_iface }}"
-        jump: MASQUERADE
-        state: present
+    # NAT masquerade rule
+    # Check rule existence (exit code 0 = exists, 1 = does not exist)
+    - name: Add NAT masquerade rule if missing
+      command: >
+        iptables -t nat -C POSTROUTING -o eth0 -j MASQUERADE
+      register: nat_masquerade_exists
+      #without this, would exit with code 1 if rule missing. Ansible would treat this as fatal error
+      failed_when: false 
+      changed_when: false
 
-    - name: Allow forwarding from private to public
-      community.general.iptables:
-        chain: FORWARD
-        in_interface: "{{ private_iface }}"
-        out_interface: "{{ public_iface }}"
-        jump: ACCEPT
-        state: present
+    # add if doesn't exist
+    - name: Apply NAT masquerade rule
+      command: >
+        iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+      when: nat_masquerade_exists.rc != 0
 
-    - name: Allow established connections from public to private
-      community.general.iptables:
-        chain: FORWARD
-        in_interface: "{{ public_iface }}"
-        out_interface: "{{ private_iface }}"
-        ctstate: ESTABLISHED,RELATED
-        jump: ACCEPT
-        state: present
+    # Private to public forwarding rules
+    # Check rule existence (exit code 0 = exists, 1 = does not exist)
+    - name: Check forward rule private → public
+      command: >
+        iptables -C FORWARD -i enp7s0 -o eth0 -j ACCEPT
+      register: priv_to_pub_fwd_exists
+      failed_when: false
+      changed_when: false
 
-    - name: Save iptables rules (iptables-persistent)
+    # add if doesn't exist
+    - name: Allow forward private → public
+      command: >
+        iptables -A FORWARD -i enp7s0 -o eth0 -j ACCEPT
+      when: priv_to_pub_fwd_exists.rc != 0
+
+    # Public to private established connection forwarding rules
+    # Check rule existence (exit code 0 = exists, 1 = does not exist)
+    - name: Check forward rule public → private (established)
+      command: >
+        iptables -C FORWARD -i eth0 -o enp7s0 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+      register: pub_to_priv_established_exists
+      failed_when: false
+      changed_when: false
+
+    # add if doesn't exist
+    - name: Allow established public → private
+      command: >
+        iptables -A FORWARD -i eth0 -o enp7s0 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+      when: pub_to_priv_established_exists.rc != 0
+
+    # Persist iptables rules
+    - name: Ensure iptables-persistent is installed
+      apt:
+        name: iptables-persistent
+        state: present
+        update_cache: yes
+
+    - name: Save iptables rules
       command: netfilter-persistent save
       changed_when: false
 
- 
