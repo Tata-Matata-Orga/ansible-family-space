@@ -13,7 +13,9 @@
     protocol: tcp
     destination_port: 8500
     # consul-1, consul-2, ...
-    source: "{{ hostvars[item].ansible_host }}"
+    #Use ansible_host if it exists, otherwise fall back to the hostname.
+    # item is the inventory hostname
+    source: "{{ hostvars[item].ansible_host  | default(item) }}"
     jump: ACCEPT
     comment: "Vault -> Consul HTTP API"
   # Jinja filter: If this value is undefined, use an empty list instead
@@ -26,7 +28,9 @@
     protocol: tcp
     destination_port: 8500
     # bastion-1, bastion-2, ...
-    source: "{{ hostvars[item].ansible_host }}"
+    ##Use ansible_host if it exists, otherwise fall back to the hostname.
+    # item is the inventory hostname
+    source: "{{ hostvars[item].ansible_host  | default(item) }}"
     jump: ACCEPT
     comment: "Bastion -> Consul HTTP API"
   # Jinja filter: If this value is undefined, use an empty list instead
