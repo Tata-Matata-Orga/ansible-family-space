@@ -28,9 +28,8 @@
     protocol: tcp
     destination_port: 8500
     # bastion-1, bastion-2, ...
-    ##Use ansible_host if it exists, otherwise fall back to the hostname.
-    # item is the inventory hostname
-    source: "{{ hostvars[item].ansible_host  | default(item) }}"
+    ##define bastion_private_ip in inventory/hosts.yaml for bastion hosts
+    source: "{{ hostvars[item].bastion_private_ip }}"
     jump: ACCEPT
     comment: "Bastion -> Consul HTTP API"
   # Jinja filter: If this value is undefined, use an empty list instead
