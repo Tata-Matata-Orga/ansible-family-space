@@ -6,7 +6,9 @@ consul_group: consul
 consul_data_dir: /opt/consul
 consul_config_dir: /etc/consul.d
 
+# Ansible fact for the default IPv4 address of the host
 consul_bind_addr: "{{ ansible_default_ipv4.address }}"
 consul_client_addr: "{{ ansible_default_ipv4.address }}"
+consul_advertise_addr: "{{ ansible_default_ipv4.address }}"
 
 consul_log_level: INFO

@@ -6,8 +6,19 @@ data_dir = "{{ consul_data_dir }}"
 server = true
 bootstrap_expect = 1
 
+# Controls Serf gossip (LAN), Raft, RPC between Consul agents
+# Used by Other Consul nodes, Vault (as a Consul client), never by humans
+# Does not affect HTTP or DNS API
 bind_addr   = "{{ consul_bind_addr }}"
+
+# HTTP API (8500) + DNS listeners (8600)
+# Used by Ansible, curl, Vault agent, humans, health checks
+# Could be 127.0.0.1, but Vault is on other machine and we want to be able to curl from Bastion
 client_addr = "{{ consul_client_addr }}"
+
+# for setup with multiple nodes
+# the address other nodes should use to reach me
+advertise_addr = "{{consul_advertise_addr }}"
 
 log_level = "{{ consul_log_level }}"
 

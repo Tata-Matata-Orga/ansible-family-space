@@ -1,3 +1,38 @@
+# Firewall
+# Otherwise responses to HTTP requests from Vault and Bastion will be dropped
+- name: Allow established connections
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+
+# Vault access
+- name: Allow Vault nodes to access Consul HTTP API
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: 8500
+    # consul-1, consul-2, ...
+    source: "{{ hostvars[item].ansible_host }}"
+    jump: ACCEPT
+    comment: "Vault -> Consul HTTP API"
+  # Jinja filter: If this value is undefined, use an empty list instead
+  loop: "{{ groups['vault'] | default([]) }}"
+
+# Bastion access
+- name: Allow Vault nodes to access Consul HTTP API
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: 8500
+    # bastion-1, bastion-2, ...
+    source: "{{ hostvars[item].ansible_host }}"
+    jump: ACCEPT
+    comment: "Bastion -> Consul HTTP API"
+  # Jinja filter: If this value is undefined, use an empty list instead
+  loop: "{{ groups['bastion'] | default([]) }}"
+
+# Consul installation and configuration
 - name: Install required packages
   apt:
     name:
@@ -88,7 +123,7 @@
 
 - name: Wait for Consul HTTP API
   uri:
-    url: http://127.0.0.1:8500/v1/status/leader
+    url: http://{{ consul_client_addr }}:8500/v1/status/leader
     method: GET
   register: consul_leader
   retries: 10
@@ -99,3 +134,5 @@
   fail:
     msg: "Consul has no leader"
   when: consul_leader.json == ""
+
+
