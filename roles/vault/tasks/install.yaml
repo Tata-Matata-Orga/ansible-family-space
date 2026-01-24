@@ -1,0 +1,49 @@
+- name: Install required packages
+  apt:
+    name:
+      - unzip
+      - curl
+    state: present
+    update_cache: yes
+
+- name: Create Vault group
+  group:
+    name: "{{ vault_group }}"
+
+- name: Create Vault user
+  user:
+    name: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    system: yes
+    shell: /usr/sbin/nologin
+
+- name: Create Vault directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0750"
+  loop:
+    - "{{ vault_data_dir }}"
+    - "{{ vault_config_dir }}"
+
+- name: Download Vault
+  get_url:
+    url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
+    dest: "{{ vault_tmp_zip}}"
+    mode: "0644"
+
+- name: Unzip Vault
+  unarchive:
+    src: "{{ vault_tmp_zip}}"
+    dest: /usr/local/bin/
+    remote_src: yes
+    creates: "{{ vault_install_dir }}"
+
+- name: Set Vault binary permissions
+  file:
+    path: "{{ vault_install_dir }}"
+    owner: root
+    group: root
+    mode: "0755"

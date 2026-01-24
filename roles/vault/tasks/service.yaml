@@ -1,0 +1,18 @@
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start Vault
+  systemd:
+    name: vault
+    enabled: yes
+    state: started
+
+- name: Wait for Vault HTTP API
+  uri:
+    url: http://{{ vault_api_addr }}/v1/status/leader
+    method: GET
+  register: vault_leader
+  retries: 10
+  delay: 3
+  until: vault_leader.status == 200

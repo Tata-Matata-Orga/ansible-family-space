@@ -1,0 +1,45 @@
+# Firewall
+# Otherwise responses to HTTP requests from Consul and Bastion will be dropped
+- name: Allow established connections
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+
+# Bastion access
+- name: Allow Bastion nodes to access Vault HTTP API
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ vault_api_port }}"
+    # bastion-1, bastion-2, ...
+    ##define bastion_private_ip in inventory/hosts.yaml for bastion hosts
+    source: "{{ hostvars[item].bastion_private_ip }}"
+    jump: ACCEPT
+    comment: "Bastion -> Vault HTTP API"
+  # Jinja filter: If this value is undefined, use an empty list instead
+  loop: "{{ groups['bastion'] | default([]) }}"
+
+# Vault installation and configuration
+
+- block:
+    - import_tasks: install.yml
+    - import_tasks: configure.yml
+    - import_tasks: service.yml
+  rescue:
+    - name: Vault install failed — show logs
+      command: journalctl -u vault
+  always:
+    - name: Cleanup temp files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ vault_tmp_zip }}"
+        - "{{ vault_tmp_dir }}"
+  vars:
+    vault_tmp_zip: /tmp/vault.zip
+    vault_tmp_dir: /tmp/vault
+
+
+
