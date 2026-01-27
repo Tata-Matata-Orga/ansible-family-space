@@ -1,9 +1,19 @@
 ui = true
 
+# Consul storage backend
+#
+# Vault does NOT connect to the Consul cluster or to a Raft leader.
+# It connects to exactly one Consul *agent* HTTP endpoint.
+# That agent abstracts the cluster and forwards requests to the
+# current leader as needed.
+#
+# Network endpoint (https(s)://host:port) defines *where* Vault reaches Consul.
+# The path defines *where inside Consul's KV store* Vault data lives.
 storage "consul" {
-  address = "{{ vault_consul_hosts[0] }}:{{ vault_consul_port }}"
-  path    = "{{ vault_consul_path }}"
+  address = "{{ consul_agent_api_scheme }}://{{ consul_addr_that_vault_connects_to }}:{{ consul_port_that_vault_connects_to }}"
+  path    = "{{ vault_prefix_in_consul_store }}"
 }
+
 
 listener "tcp" {
   address     = "0.0.0.0:{{ vault_api_port }}"

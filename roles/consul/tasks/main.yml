@@ -1,5 +1,29 @@
 # Firewall
 # Otherwise responses to HTTP requests from Vault and Bastion will be dropped
+- import_tasks: firewall.yaml
+
+- import_tasks: install.yaml
+- import_tasks: configure.yaml
+- import_tasks: service.yaml
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - name: Allow established connections
   iptables:
     chain: INPUT

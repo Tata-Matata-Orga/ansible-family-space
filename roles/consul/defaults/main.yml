@@ -1,17 +1,17 @@
+# Version
 consul_version: "1.22.2"
 
+# User / group
 consul_user: consul
 consul_group: consul
 
-consul_data_dir: /opt/consul
+# Paths
+consul_data_dir: /opt/consul/data
 consul_config_dir: /etc/consul.d
+consul_tls_dir: /etc/consul.d/tls
+consul_install_dir: /usr/local/bin
+consul_binary_path: "{{consul_install_dir}}/consul"
 
-# Ansible fact for the default IPv4 address of the host
-consul_bind_addr: "{{ ansible_default_ipv4.address }}"
-consul_client_addr: "{{ ansible_default_ipv4.address }}"
-consul_advertise_addr: "{{ ansible_default_ipv4.address }}"
-
+# Logging
 consul_log_level: INFO
 
-
-consul_tls_dir: /etc/consul.d/tls
