@@ -1,0 +1,19 @@
+
+# supports both http and https based on variables
+- name: Wait for Consul to become healthy
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Wait for Consul HTTP API to be reachable
+      uri:
+        url: "{{consul_agent_api_scheme}}://{{ consul_client_addr }}:{{ consul_agent_api_port }}/v1/status/leader"
+        method: GET
+        return_content: true
+        status_code: 200
+      register: consul_status
+      retries: 30
+      delay: 2
+      until:
+        - consul_status is succeeded
+        - consul_status.content is defined

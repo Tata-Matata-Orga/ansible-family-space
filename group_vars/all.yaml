@@ -24,17 +24,6 @@ consul_agent_api_scheme: "{{ 'https' if consul_agent_tls_enabled else 'http' }}"
 # TLS lifecycle flag (flipped by bootstrap-tls playbook via set_fact)
 consul_agent_tls_enabled: false
 
-######################################################
-######### Consul-Vault  ##############################
-######################################################
-
-consul_addr_that_vault_connects_to: "{{ consul_client_addr }}"
-consul_port_that_vault_connects_to: "{{ consul_agent_api_port }}"
-
-#key prefix inside Consul’s KV store where Vault data will be stored
-vault_prefix_in_consul_store: "vault/"
-
-
 
 ######################################################
 ######### Vault  #####################################
@@ -51,3 +40,15 @@ vault_api_health_path: /v1/sys/health
 
 vault_api_addr: "https://{{ ansible_default_ipv4.address }}:{{ vault_api_port }}"
 vault_cluster_addr: "https://{{ ansible_default_ipv4.address }}:{{ vault_cluster_port}}"
+
+######################################################
+######### Consul-Vault  ##############################
+######################################################
+
+consul_addr_that_vault_connects_to: "{{ consul_client_addr }}"
+consul_port_that_vault_connects_to: "{{ consul_agent_api_port }}"
+
+#key prefix inside Consul’s KV store where Vault data will be stored
+vault_prefix_in_consul_store: "vault/"
+
+
