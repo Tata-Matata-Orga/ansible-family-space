@@ -1,18 +1,9 @@
 ###############################################################################
-# Issue client TLS certificates (Bastion only)
+# Issue client TLS certificates on Bastion for Consul clients to authenticate to Consul servers
 #
 # Clients:
-#   - Vault (as Consul client)
-#   - Bastion (as Consul client)
-#
-# Each client gets:
-#   - private key
-#   - CSR
-#   - certificate signed by bootstrap CA
-###############################################################################
-
-###############################################################################
-# Directory layout
+#   - Vault
+#   - Bastion
 ###############################################################################
 
 - name: Ensure client TLS directory exists (on Bastion)
