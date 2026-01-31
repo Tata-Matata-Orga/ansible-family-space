@@ -9,7 +9,7 @@
 
 - name: Assert bootstrap CA key does not already exist
   stat:
-    path: "{{ bootstrap_tls_dir }}/ca.key"
+    path: "{{ ca_key_path_on_bastion }}"
   register: existing_ca_key
   changed_when: false
 
@@ -35,7 +35,7 @@
 
 - name: Generate bootstrap TLS CA private key
   community.crypto.openssl_privatekey:
-    path: "{{ bootstrap_tls_dir }}/ca.key"
+    path: "{{ ca_key_path_on_bastion }}"
     type: ed25519
     owner: root
     group: root
@@ -49,8 +49,8 @@
 
 - name: Generate bootstrap TLS CA certificate
   community.crypto.openssl_certificate:
-    path: "{{ bootstrap_tls_dir }}/ca.pem"
-    privatekey_path: "{{ bootstrap_tls_dir }}/ca.key"
+    path: "{{ ca_cert_path_on_bastion }}"
+    privatekey_path: "{{ ca_key_path_on_bastion }}"
     provider: selfsigned
     selfsigned_not_after: "+{{ bootstrap_ca_ttl_days }}d"
     subject:
@@ -79,22 +79,13 @@
       Bootstrap TLS CA TTL is too long.
       This CA must be short-lived by design (<= 14 days).
 
-
 - name: Assert bootstrap CA files exist
   stat:
     path: "{{ item }}"
   loop:
-    - "{{ bootstrap_tls_dir }}/ca.key"
-    - "{{ bootstrap_tls_dir }}/ca.pem"
-  register: bootstrap_ca_files
+     - "{{ ca_key_path_on_bastion }}"
+     - "{{ ca_cert_path_on_bastion }}"
+  register: tls_files
   changed_when: false
+  failed_when: not tls_files.stat.exists
 
-
-- name: Fail if bootstrap CA files are missing
-  fail:
-    msg: >
-      Bootstrap TLS CA generation failed. Required files are missing.
-  when: bootstrap_ca_files.results
-        | selectattr('stat.exists', 'equalto', false)
-        | list
-        | length > 0

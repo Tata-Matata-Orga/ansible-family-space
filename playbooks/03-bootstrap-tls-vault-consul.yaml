@@ -118,7 +118,7 @@
       import_tasks: ../tasks/bootstrap-tls-vault-consul/30_distribute_tls_vault.yaml
 
 # Distribute Consul TLS material from Bastion to Consul
-- name: Install Consul TLS material
+- name: Copy Consul TLS material from Bastion to Consul
   hosts: consul
   gather_facts: true
   become: true
@@ -126,7 +126,7 @@
     - ../vars/bootstrap-tls-vault-consul.yaml
 
   tasks:
-    - name: Install Consul TLS material
+    - name: Copy Consul TLS material from Bastion to Consul
       import_tasks: ../tasks/bootstrap-tls-vault-consul/31_distribute_tls_consul.yaml
 
 # Install Bastion client TLS material for Consul mTLS

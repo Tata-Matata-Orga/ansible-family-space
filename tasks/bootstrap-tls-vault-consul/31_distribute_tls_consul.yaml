@@ -1,18 +1,10 @@
 ---
 ###############################################################################
-# Distribute bootstrap TLS material from Bastion to Consul
+# Copy TLS artifacts generated on primary Bastion host to Consul hosts
 #
-# Purpose:
-#   - Copy TLS artifacts generated on Bastion to target hosts
-#   - Enforce correct ownership and permissions
-#
-# Guarantees:
-#   - CA private key NEVER leaves Bastion
-#   - Consul receives:
-#       * CA cert
-#       * Consul cert
-#       * Consul private key
-
+# - CA certificate
+# - Consul server certificate + private key
+# 
 ###############################################################################
 
 - name: Ensure Consul TLS directory exists
