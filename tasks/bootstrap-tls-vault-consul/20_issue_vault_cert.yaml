@@ -1,25 +1,9 @@
 ---
 ###############################################################################
-# Issue Vault server TLS certificate (Bastion only)
+# Issue Vault server TLS certificate on Bastion for Vault server to authenticate to its clients
 #
-# Purpose:
-#   - Generate Vault private key
-#   - Create CSR with correct SANs
-#   - Sign CSR using bootstrap TLS CA
-#
-# Inputs (expected to exist):
-#   - {{ bootstrap_tls_dir }}/ca/ca.key
-#   - {{ bootstrap_tls_dir }}/ca/ca.pem
-#
-# Outputs:
-#   - {{ bootstrap_tls_dir }}/vault/vault.key
-#   - {{ bootstrap_tls_dir }}/vault/vault.csr
-#   - {{ bootstrap_tls_dir }}/vault/vault.pem
 ###############################################################################
 
-###############################################################################
-# Directory layout
-###############################################################################
 
 - name: Ensure Vault TLS directory exists (on Bastion)
   file:

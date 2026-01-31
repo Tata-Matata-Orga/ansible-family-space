@@ -1,19 +1,6 @@
 ###############################################################################
-# Issue Consul server TLS certificate (Bastion only)
+# Issue Consul server TLS certificate on Bastion for Consul server to authenticate to clients
 #
-# Purpose:
-#   - Generate Consul private key
-#   - Create CSR with correct SANs
-#   - Sign CSR using bootstrap TLS CA
-#
-# Outputs (per Consul host):
-#   - consul.key
-#   - consul.csr
-#   - consul.pem
-###############################################################################
-
-###############################################################################
-# Directory layout
 ###############################################################################
 
 - name: Ensure Consul TLS directory exists (on Bastion)

@@ -74,6 +74,7 @@
       loop: "{{ groups['vault'] }}"
       loop_control:
         loop_var: vault_host
+        
     # Consul server cert issuance (per Consul host)
     - name: Issue Consul server TLS certificates
       import_tasks: ../tasks/bootstrap-tls-vault-consul/21_issue_consul_cert.yaml
