@@ -3,3 +3,9 @@
 
 bootstrap_tls_dir: /var/lib/bootstrap-tls
 bootstrap_ca_ttl_days: 7
+
+
+vault_server_cert_file: vault.pem
+vault_server_key_file: vault.key
+
+ca_cert_file: ca.pem

@@ -106,7 +106,7 @@
 
 
 # Distribute Vault TLS material from Bastion to Vault
-- name: Install Vault TLS material
+- name: Copy Vault TLS material from Bastion to Vault
   hosts: vault
   gather_facts: true
   become: true
@@ -114,7 +114,7 @@
     - ../vars/bootstrap-tls-vault-consul.yaml
 
   tasks:
-    - name: Install Vault TLS material
+    - name: Copy Vault TLS material from Bastion to Vault
       import_tasks: ../tasks/bootstrap-tls-vault-consul/30_distribute_tls_vault.yaml
 
 # Distribute Consul TLS material from Bastion to Consul
