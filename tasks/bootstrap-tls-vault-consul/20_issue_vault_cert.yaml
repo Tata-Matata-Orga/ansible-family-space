@@ -61,8 +61,8 @@
     path: "{{ bootstrap_tls_dir }}/vault/{{ vault_host }}/{{vault_server_cert_file}}"
     csr_path: "{{ bootstrap_tls_dir }}/vault/{{ vault_host }}/vault.csr"
     provider: ownca
-    ownca_path: "{{ bootstrap_tls_dir }}/ca.pem"
-    ownca_privatekey_path: "{{ bootstrap_tls_dir }}/ca.key"
+    ownca_path: "{{ ca_cert_path_on_bastion }}"
+    ownca_privatekey_path: "{{ ca_key_path_on_bastion }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
 
 
@@ -72,14 +72,9 @@
 
 - name: Assert Vault TLS certificate was created
   stat:
-    path: "{{ bootstrap_tls_dir }}/vault/{{ vault_host }}/{{vault_server_cert_file}}"
-  register: vault_cert_stat
+    path: "{{ item }}"
+  loop:
+     - "{{ bootstrap_tls_dir }}/vault/{{ vault_host }}/{{vault_server_cert_file}}"
+  register: tls_files
   changed_when: false
-
-
-- name: Fail if Vault TLS certificate is missing
-  fail:
-    msg: >
-      Vault TLS certificate was not created.
-      Bootstrap TLS process cannot continue.
-  when: not vault_cert_stat.stat.exists
+  failed_when: not tls_files.stat.exists

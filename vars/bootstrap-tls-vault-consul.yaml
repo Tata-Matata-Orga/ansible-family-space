@@ -12,19 +12,24 @@ consul_client_key_file: consul-client.key
 bootstrap_tls_dir: /var/lib/bootstrap-tls
 bootstrap_ca_ttl_days: 7
 
-ca_cert_path_on_bastion: {{ bootstrap_tls_dir }}/{{ ca_cert_file }}
-ca_key_path_on_bastion: {{ bootstrap_tls_dir }}/{{ ca_key_file }}
+ca_cert_path_on_bastion: "{{ bootstrap_tls_dir }}/{{ ca_cert_file }}"
+ca_key_path_on_bastion: "{{ bootstrap_tls_dir }}/{{ ca_key_file }}"
 
 
 
 # temporary TLS material on Vault and Consul nodes
-vault_server_cert_path: "{{ vault_tls_dir }}/vault.pem"
-vault_server_key_path: "{{ vault_tls_dir }}/vault.key"
+vault_server_cert_file: vault-server.pem
+vault_server_key_file: vault-server.key
+vault_server_cert_path: "{{ vault_tls_dir }}/{{vault_server_cert_file}}"
+vault_server_key_path: "{{ vault_tls_dir }}/{{vault_server_key_file}}"
 vault_ca_cert_path: "{{ vault_tls_dir }}/{{ca_cert_file}}"
 
 
+vault_client_cert_path_for_consul: "{{ vault_tls_dir }}/{{ consul_client_cert_dir }}/{{ consul_client_cert_file }}"
+vault_client_key_path_for_consul: "{{ vault_tls_dir }}/{{ consul_client_cert_dir }}/{{ consul_client_key_file }}"
 
-
-
-vault_client_cert_path_for_consul: {{ vault_tls_dir }}/{{ consul_client_cert_dir }}/{{ consul_client_cert_file }}
-vault_client_key_path_for_consul: {{ vault_tls_dir }}/{{ consul_client_cert_dir }}/{{ consul_client_key_file }}
+consul_server_cert_file: consul.pem
+consul_server_key_file: consul.key
+consul_server_cert_path: "{{ consul_tls_dir }}/{{ consul_server_cert_file }}"
+consul_server_key_path: "{{ consul_tls_dir }}/{{ consul_server_key_file }}"
+consul_ca_cert_path: "{{ consul_tls_dir }}/{{ ca_cert_file }}"
