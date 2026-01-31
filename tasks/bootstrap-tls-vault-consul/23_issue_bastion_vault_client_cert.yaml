@@ -1,14 +1,9 @@
 ###############################################################################
-# Issue Bastion → Vault client TLS certificate (Bastion only)
+# Issue Bastion client certificate on Bastion primary server (to distribute later to each Bastion)
+# For Bastion to authenticate to Vault API via mTLS as client
 #
-# Purpose:
-#   - Allow Bastion to authenticate to Vault API via mTLS
-#   - Certificate is temporary and signed by bootstrap CA
 ###############################################################################
 
-###############################################################################
-# Directory layout
-###############################################################################
 
 - name: Ensure Bastion Vault client TLS directory exists (on Bastion)
   file:
