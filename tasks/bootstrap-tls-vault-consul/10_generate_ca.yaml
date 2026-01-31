@@ -1,11 +1,6 @@
 ---
 ###############################################################################
-# Generate bootstrap TLS CA (Bastion only)
-#
-# Purpose:
-#   - Create a short-lived internal TLS CA used ONLY for:
-#       * Vault API TLS
-#       * Vault -> Consul TLS
+# Generate short-lived internal TLS CA on Bastion, distribute to Vault and Consul for client certs validation
 #
 # Guarantees:
 #   - CA private key exists ONLY on Bastion
@@ -48,7 +43,7 @@
   register: bootstrap_ca_key
 
 
-  ###############################################################################
+###############################################################################
 # CA certificate
 ###############################################################################
 
@@ -59,7 +54,7 @@
     provider: selfsigned
     selfsigned_not_after: "+{{ bootstrap_ca_ttl_days }}d"
     subject:
-      common_name: "vault-bootstrap-tls-ca"
+      common_name: "vault-consul-bootstrap-tls-ca"
       organization_name: "internal"
     basic_constraints:
       - "CA:TRUE"
