@@ -38,7 +38,7 @@
 - name: Unzip Consul
   unarchive:
     src: "{{ consul_tmp_zip }}"
-    dest: /usr/local/bin/
+    dest: "{{ consul_install_dir }}"
     remote_src: yes
 
 - name: Set Consul binary permissions

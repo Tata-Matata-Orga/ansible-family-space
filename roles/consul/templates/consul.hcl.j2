@@ -1,12 +1,22 @@
-datacenter = "dc1"
+datacenter = "{{ consul_datacenter }}"
 node_name  = "{{ inventory_hostname }}"
 
 data_dir = "{{ consul_data_dir }}"
 
-server = true
-bootstrap_expect = 1
+# true if this node is a server, not just a client
+# Client forwards requests, no data, no Raft
+# Server participates in Raft, stores data, can become leader
+server = "{{ consul_server }}"
+
+# minimal number of Consul servers that are required to form a cluster
+# applies only to Consul servers (consul_server = true)
+# initial Raft bootstrap setting
+bootstrap_expect = "{{ bootstrap_expect }}"
+
+
 log_level = "{{ consul_log_level }}"
-ui = false
+
+ui = true
 
 #########################
 # ADDRESSES #############
@@ -14,16 +24,15 @@ ui = false
 # Controls Serf gossip (LAN), Raft, RPC between Consul agents
 # Used by Other Consul nodes, Vault (as a Consul client), never by humans
 # Does not affect HTTP or DNS API
-bind_addr   = "{{ consul_bind_addr }}"
+bind_addr   = "{{ consul_internal_bind_addr }}"
 
 # HTTP API (8500) + DNS listeners (8600)
 # Used by Ansible, curl, Vault agent, humans, health checks
-# Could be 127.0.0.1, but Vault is on other machine and we want to be able to curl from Bastion
 client_addr = "{{ consul_client_addr }}"
 
 # for setup with multiple nodes
 # the address other nodes should use to reach me
-advertise_addr = "{{consul_advertise_addr }}"
+advertise_addr = "{{ consul_internal_advertise_addr }}"
 
 
 
@@ -31,8 +40,20 @@ advertise_addr = "{{consul_advertise_addr }}"
 # TLS with Vault ########
 #########################
 
+# verify_outgoing = when this Consul agent connects to others, it must verify their TLS certificates.
+# verify_incoming = When others connect to this Consul agent, require them to present a client certificate
+# (Vault → Consul, Bastion → Consul, CLI → Consul)
+# if false - clients authenticate using ACL tokens (opaque bearer tokens stored in Consul’s Raft state) instead of mTLS (temporary config until Vault can issue certificates itself)
+# Later: True = mTLS: every client (Vault, Bastion, Consul CLI, health checks) to present a valid TLS client certificate signed by Consul’s CA
+# cert SAN must match allowed identities
 {% if consul_tls_enabled | default(false) %}
+
 verify_outgoing = true
-verify_incoming = false
+verify_incoming = true
+
+cert_file = "{{ consul_tls_dir }}/consul.pem"
+key_file  = "{{ consul_tls_dir }}/consul.key"
 ca_file = "{{ consul_tls_dir }}/ca.pem"
+
+
 {% endif %}

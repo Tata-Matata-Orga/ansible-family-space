@@ -12,7 +12,15 @@ ui = true
 storage "consul" {
   address = "{{ consul_agent_api_scheme }}://{{ consul_addr_that_vault_connects_to }}:{{ consul_port_that_vault_connects_to }}"
   path    = "{{ vault_prefix_in_consul_store }}"
+
+  {% if consul_tls_enabled %}
+  # TLS / mTLS for Vault → Consul
+  tls_ca_file   = "{{ vault_tls_dir }}/ca.pem"
+  tls_cert_file = "{{ vault_tls_dir }}/consul-client/client.pem"
+  tls_key_file  = "{{ vault_tls_dir }}/consul-client/client.key"
+  {% endif %}
 }
+
 
 
 listener "tcp" {
@@ -21,6 +29,7 @@ listener "tcp" {
   tls_disable = 0
   tls_cert_file = "{{ vault_tls_dir }}/vault.pem"
   tls_key_file  = "{{ vault_tls_dir }}/vault.key"
+  # With CA file specified, we wil have mTLS: Vault will require every client to present a TLS client certificate.
   tls_client_ca_file = "{{ vault_tls_dir }}/ca.pem"
   {% else %}
   tls_disable = 1

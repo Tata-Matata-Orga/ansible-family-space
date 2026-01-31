@@ -8,12 +8,10 @@
 #
 # Guarantees:
 #   - CA private key NEVER leaves Bastion
-#   - Vault receives:
-#       * CA cert
-#       * Vault server cert
-#       * Vault private key
 #   - Consul receives:
-#       * CA cert only
+#       * CA cert
+#       * Consul cert
+#       * Consul private key
 
 ###############################################################################
 
@@ -54,3 +52,54 @@
       CA certificate missing on {{ inventory_hostname }}.
       TLS bootstrap cannot proceed.
   when: not consul_ca_cert_stat.stat.exists
+
+###############################################################################
+# Distribute Consul server certificate & key
+###############################################################################
+
+- name: Copy Consul TLS certificate
+  copy:
+    src: "{{ bootstrap_tls_dir }}/consul/{{ inventory_hostname }}/consul.pem"
+    dest: "{{ consul_tls_dir }}/consul.pem"
+    owner: consul
+    group: consul
+    mode: "0644"
+    remote_src: yes
+  delegate_to: "{{ bastion_primary_host }}"
+
+- name: Copy Consul TLS private key
+  copy:
+    src: "{{ bootstrap_tls_dir }}/consul/{{ inventory_hostname }}/consul.key"
+    dest: "{{ consul_tls_dir }}/consul.key"
+    owner: consul
+    group: consul
+    mode: "0600"
+    remote_src: yes
+  delegate_to: "{{ bastion_primary_host }}"
+
+
+###############################################################################
+# Sanity checks
+###############################################################################
+
+- name: Assert Consul TLS material present
+  stat:
+    path: "{{ item }}"
+  loop:
+    - "{{ consul_tls_dir }}/ca.pem"
+    - "{{ consul_tls_dir }}/consul.pem"
+    - "{{ consul_tls_dir }}/consul.key"
+  register: consul_tls_files
+  changed_when: false
+
+- name: Fail if Consul TLS material missing
+  fail:
+    msg: >
+      Consul TLS material missing on {{ inventory_hostname }}.
+      TLS bootstrap cannot proceed.
+  when: >
+    consul_tls_files.results
+    | selectattr('stat.exists', 'equalto', false)
+    | list
+    | length > 0
+

@@ -2,9 +2,16 @@
 ###############################################################################
 # Distribute bootstrap TLS material to Vault and Consul
 #
-# Purpose:
+# This is an initial temporary TLS configuration, Vault is NOT a PKI auhority yet.
+# still we want to secure communication channels from the start (Bastion, curl, etc.).
+# The temporary CA exists only so Vault can speak HTTPS before Vault can issue certificates itself.
+# Later on, once Vault is fully configured, it will issue TLS certificates to itself and Consul.
+#
+# Steps performed:
 #   - Copy TLS artifacts generated on Bastion to target hosts
 #   - Enforce correct ownership and permissions
+#
+# Vault becomes a CA only after: initialization --> unseal --> PKI engine enabled --> root or intermediate CA generated
 #
 # Guarantees:
 #   - CA private key NEVER leaves Bastion
@@ -12,8 +19,6 @@
 #       * CA cert
 #       * Vault server cert
 #       * Vault private key
-#   - Consul receives:
-#       * CA cert only
 
 ###############################################################################
 

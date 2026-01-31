@@ -1,7 +1,8 @@
 
-###############################################################################
-# Bootstrap marker checks (Bastion)
-####################################################################
+######################################################################################
+# Bootstrap marker file should not exist on Bastion before proceeding to TLS bootstrap
+# It would mean that bootstrap TLS has already been applied
+######################################################################################
 - name: Check if bootstrap TLS marker exists on Bastion
   stat:
     path: "{{ bootstrap_tls_dir }}/BOOTSTRAP_COMPLETE"

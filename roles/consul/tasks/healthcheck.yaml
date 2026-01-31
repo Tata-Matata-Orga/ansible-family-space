@@ -1,19 +1,30 @@
 
 # supports both http and https based on variables
-- name: Wait for Consul to become healthy
-  become: true
-  gather_facts: false
 
-  tasks:
-    - name: Wait for Consul HTTP API to be reachable
-      uri:
-        url: "{{consul_agent_api_scheme}}://{{ consul_client_addr }}:{{ consul_agent_api_port }}/v1/status/leader"
-        method: GET
-        return_content: true
-        status_code: 200
-      register: consul_status
-      retries: 30
-      delay: 2
-      until:
-        - consul_status is succeeded
-        - consul_status.content is defined
+# On first startup (especially single-node), /v1/status/leader
+# may briefly return empty or 500 while Raft bootstraps.
+# We first wait for the agent API, then for leader election
+- name: Wait for Consul agent API to be reachable
+  uri:
+    url: "{{ consul_agent_api_scheme }}://{{ consul_client_addr }}:{{ consul_agent_api_port }}/v1/agent/self"
+    method: GET
+    status_code: 200
+    # validate_certs is ignored when using HTTP, only becomes relevant for HTTPS
+    validate_certs: "{{ consul_agent_tls_enabled }}"
+  retries: 30
+  delay: 2
+
+- name: Wait for Consul leader election
+  uri:
+    url: "{{ consul_agent_api_scheme }}://{{ consul_client_addr }}:{{ consul_agent_api_port }}/v1/status/leader"
+    method: GET
+    return_content: true
+    status_code: 200
+    # validate_certs is ignored when using HTTP, only becomes relevant for HTTPS
+    validate_certs: "{{ consul_agent_tls_enabled }}"
+  register: consul_leader
+  retries: 30
+  delay: 2
+  until:
+    - consul_leader is succeeded
+    - consul_leader.content | trim | length > 0

@@ -1,0 +1,36 @@
+###############################################################################
+# Distribute Bastion client TLS material (Bastion → Consul)
+###############################################################################
+######## USAGE ################################################################
+# export CONSUL_CACERT=/etc/consul-client/ca.pem
+# export CONSUL_CLIENT_CERT=/etc/consul-client/client.pem
+# export CONSUL_CLIENT_KEY=/etc/consul-client/client.key
+###############################################################################
+
+- name: Ensure Bastion TLS directory exists
+  file:
+    path: "{{ bastion_tls_dir }}/consul-client"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+
+- name: Copy Bastion client certificate
+  copy:
+    src: "{{ bootstrap_tls_dir }}/clients/bastion/client.pem"
+    dest: "{{ bastion_tls_dir }}/consul-client/client.pem"
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: yes
+
+
+- name: Copy Bastion client private key
+  copy:
+    src: "{{ bootstrap_tls_dir }}/clients/bastion/client.key"
+    dest: "{{ bastion_tls_dir }}/consul-client/client.key"
+    owner: root
+    group: root
+    mode: "0600"
+    remote_src: yes

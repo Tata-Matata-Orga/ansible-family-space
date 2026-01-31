@@ -16,9 +16,10 @@ bastion_primary_host: >-
 # used by Vault, Bastion, kubectl plugins, etc.
 consul_client_addr: "{{ hostvars[groups['consul'][0]].ansible_host }}"
 
-# Port of the Consul agent API (HTTP or HTTPS depending on TLS phase)
+# Port of the Consul agent API 
 consul_agent_api_port: 8500
 
+# HTTP or HTTPS depending on TLS phase
 consul_agent_api_scheme: "{{ 'https' if consul_agent_tls_enabled else 'http' }}"
 
 # TLS lifecycle flag (flipped by bootstrap-tls playbook via set_fact)
@@ -29,17 +30,19 @@ consul_agent_tls_enabled: false
 ######### Vault  #####################################
 ######################################################
 
-# Vault network interface advertized, not internal (stable contract)
 vault_api_port: 8200
 vault_cluster_port: 8201
 
 vault_api_health_path: /v1/sys/health
 
+# HTTP or HTTPS depending on TLS phase
+vault_agent_api_scheme: "{{ 'https' if vault_agent_tls_enabled else 'http' }}"
 
+vault_api_addr: "{{ vault_agent_api_scheme }}://{{ ansible_default_ipv4.address }}:{{ vault_api_port }}"
+vault_cluster_addr: "{{ vault_agent_api_scheme }}://{{ ansible_default_ipv4.address }}:{{ vault_cluster_port}}"
 
-
-vault_api_addr: "https://{{ ansible_default_ipv4.address }}:{{ vault_api_port }}"
-vault_cluster_addr: "https://{{ ansible_default_ipv4.address }}:{{ vault_cluster_port}}"
+# TLS lifecycle flag (flipped by bootstrap-tls playbook via set_fact)
+vault_agent_tls_enabled: false
 
 ######################################################
 ######### Consul-Vault  ##############################

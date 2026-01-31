@@ -1,22 +1,23 @@
 ---
 ###############################################################################
 # Pre-flight checks for Vault TLS bootstrap
+# This file MUST NOT change system state
 #
 # This file enforces that we are in the correct lifecycle phase:
 #   - Vault is installed and reachable over HTTP (NOT HTTPS yet)
 #   - Vault is NOT initialized
 #   - Bootstrap TLS has NOT already been applied
 #
-# This file MUST NOT change system state.
+# PERFORMED ON VAULT SERVERS ONLY
 ###############################################################################
 
 - name: Check Vault health endpoint (pre-TLS)
   uri:
     url: >-
-      {{ vault_api_scheme | default('http') }}://127.0.0.1:{{ vault_api_port }}/v1/sys/health
-    status_code: [200, 429, 501]
+      http://127.0.0.1:{{ vault_api_port }}/{{ vault_api_health_path }}
+    status_code: [200, 429, 501] # Consider this request successful if the HTTP response status code is ANY of these values
   register: vault_health
-  changed_when: false # This task observes state; it never mutates state
+  changed_when: false # means, this task observes state; it never mutates state
 
 # Vault returns this kind of response
 # {
@@ -42,7 +43,7 @@
 - name: Assert Vault API scheme is HTTP (pre-TLS)
   assert:
     that:
-      - vault_api_scheme | default('http') == 'http'
+      - vault_agent_api_scheme == 'http'
     fail_msg: >
       Vault API is already using HTTPS.
       Bootstrap TLS must not be applied twice.

@@ -1,0 +1,37 @@
+###############################################################################
+# Install Bastion Vault client TLS material
+###############################################################################
+################ USAGE ########################################################
+# export VAULT_ADDR=https://{{ vault_private_ip }}:{{ vault_api_port }}
+# export VAULT_CACERT={{ bastion_tls_dir }}/vault-client/ca.pem
+# export VAULT_CLIENT_CERT={{ bastion_tls_dir }}/vault-client/client.pem
+# export VAULT_CLIENT_KEY={{ bastion_tls_dir }}/vault-client/client.key
+###############################################################################
+
+- name: Ensure Bastion Vault client TLS directory exists
+  file:
+    path: "{{ bastion_tls_dir }}/vault-client"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+
+- name: Copy Bastion Vault client certificate
+  copy:
+    src: "{{ bootstrap_tls_dir }}/clients/bastion-vault/client.pem"
+    dest: "{{ bastion_tls_dir }}/vault-client/client.pem"
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: yes
+
+
+- name: Copy Bastion Vault client private key
+  copy:
+    src: "{{ bootstrap_tls_dir }}/clients/bastion-vault/client.key"
+    dest: "{{ bastion_tls_dir }}/vault-client/client.key"
+    owner: root
+    group: root
+    mode: "0600"
+    remote_src: yes
