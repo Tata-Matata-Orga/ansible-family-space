@@ -1,0 +1,55 @@
+# we expect only 429 (sealed) or 501 (uninitialized) here since Vault is not initialized yet (200 = initialized + unsealed)
+- hosts: vault
+  become: false
+  gather_facts: false
+  tasks:
+  - name: Verify Vault HTTPS is active (final state)
+    uri:
+      url: "https://127.0.0.1:{{ vault_api_port }}/{{ vault_api_health_path }}"
+      method: GET
+      status_code: [ 429, 501 ]
+      ca_path: "{{ vault_ca_cert_path }}"
+      validate_certs: true
+      return_content: false
+    changed_when: false
+
+- hosts: vault
+  become: true
+  gather_facts: false
+  tasks:
+  - name: Mark TLS bootstrap as complete on bastion
+    file:
+      path: "{{ bastion_tls_dir }}/TLS_BOOTSTRAP_COMPLETE"
+      state: touch
+      owner: root
+      group: root
+      mode: "0600"
+
+  # verify mTLS from Bastion to Vault and Consul
+  - name: Check Vault HTTPS from Bastion
+    uri:
+      url: "https://{{ vault_api_addr | regex_replace('^https://', '') }}/v1/sys/health"
+      method: GET
+      status_code: [ 200, 429, 501 ]
+      # to verify Consul server certs signed by our CA
+      ca_path: "{{ bastion_ca_cert_path }} "
+      # mTLS client certs for Bastion → Consul
+      client_cert: "{{ bastion_client_auth_to_vault_cert_path }}"
+      client_key: "{{ bastion_client_auth_to_vault_key_path }}"
+      validate_certs: true
+      return_content: false
+    changed_when: false
+
+  - name: Check Consul HTTPS from Bastion
+    uri:
+      url: "{{ consul_api_addr }}{{ consul_api_leader_path}}"
+      method: GET
+      status_code: 200
+      # to verify Consul server certs signed by our CA
+      ca_path: "{{ bastion_ca_cert_path }}"
+      # mTLS client certs for Bastion → Consul
+      client_cert: "{{ bastion_client_auth_to_consul_cert_path }}"
+      client_key: "{{ bastion_client_auth_to_consul_key_path }}"
+      validate_certs: true
+      return_content: false
+    changed_when: false

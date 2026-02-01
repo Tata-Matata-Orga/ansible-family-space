@@ -43,7 +43,7 @@
 - name: Assert Vault API scheme is HTTP (pre-TLS)
   assert:
     that:
-      - vault_agent_api_scheme == 'http'
+      - vault_api_scheme == 'http'
     fail_msg: >
       Vault API is already using HTTPS.
       Bootstrap TLS must not be applied twice.

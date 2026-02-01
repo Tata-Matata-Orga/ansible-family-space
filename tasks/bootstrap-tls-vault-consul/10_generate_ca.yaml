@@ -79,13 +79,57 @@
       Bootstrap TLS CA TTL is too long.
       This CA must be short-lived by design (<= 14 days).
 
+
 - name: Assert bootstrap CA files exist
   stat:
-    path: "{{ item }}"
-  loop:
-     - "{{ bastion_ca_key_path }}"
-     - "{{ bastion_ca_cert_path }}"
-  register: tls_files
+    path: "{{ item.path }}"
+    follow: false
+  loop: 
+    - path: "{{ bastion_ca_key_path }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0600"  
+    - path: "{{ bastion_ca_cert_path }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0644"
+  register: path_stats
   changed_when: false
-  failed_when: not tls_files.stat.exists
+  failed_when: >
+    path_stats.results
+    | selectattr('stat.exists', 'equalto', false)
+    | list
+    | length > 0
+    or
+    path_stats.results
+    | selectattr('item.type', 'equalto', 'file')
+    | selectattr('stat.isreg', 'equalto', false)
+    | list
+    | length > 0
+    or
+    path_stats.results
+    | selectattr('item.type', 'equalto', 'directory')
+    | selectattr('stat.isdir', 'equalto', false)
+    | list
+    | length > 0
+    or
+    path_stats.results
+    | selectattr('item.owner', 'defined')
+    | selectattr('stat.pw_name', 'ne', attribute='item.owner')
+    | list
+    | length > 0
+    or
+    path_stats.results
+    | selectattr('item.group', 'defined')
+    | selectattr('stat.gr_name', 'ne', attribute='item.group')
+    | list
+    | length > 0
+    or
+    path_stats.results
+    | selectattr('item.mode', 'defined')
+    | selectattr('stat.mode', 'ne', attribute='item.mode')
+    | list
+    | length > 0
 

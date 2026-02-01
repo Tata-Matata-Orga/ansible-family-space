@@ -1,0 +1,19 @@
+Short-term (acceptable):
+
+/etc/consul.d/token.hcl
+
+/etc/vault.d/consul.hcl
+
+Permissions:
+
+token files: 0600
+
+owned by service user
+
+Later:
+
+Vault Agent
+
+Env injection
+
+Dynamic auth

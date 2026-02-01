@@ -1,0 +1,17 @@
+This must be:
+
+run_once: true
+
+delegated to one Consul server
+
+guarded by a marker file
+
+Output:
+
+Management token (highest privilege)
+
+Store it:
+
+Short-term: Ansible vault
+
+Medium-term: injected into Vault after Vault init

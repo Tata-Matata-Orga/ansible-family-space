@@ -1,4 +1,3 @@
-
 # supports both http and https based on variables
 
 # On first startup (especially single-node), /v1/status/leader
@@ -6,7 +5,7 @@
 # We first wait for the agent API, then for leader election
 - name: Wait for Consul agent API to be reachable
   uri:
-    url: "{{ consul_agent_api_scheme }}://{{ consul_client_addr }}:{{ consul_agent_api_port }}/v1/agent/self"
+    url: "{{ consul_agent_api_scheme }}://{{ ansible_default_ipv4.address }}:{{ consul_agent_api_port }}{{consul_api_health_path}}"
     method: GET
     status_code: 200
     # validate_certs is ignored when using HTTP, only becomes relevant for HTTPS
@@ -16,7 +15,7 @@
 
 - name: Wait for Consul leader election
   uri:
-    url: "{{ consul_agent_api_scheme }}://{{ consul_client_addr }}:{{ consul_agent_api_port }}/v1/status/leader"
+    url: "{{ consul_agent_api_scheme }}://{{ ansible_default_ipv4.address }}:{{ consul_agent_api_port }}{{consul_api_leader_path}}"
     method: GET
     return_content: true
     status_code: 200
@@ -26,5 +25,5 @@
   retries: 30
   delay: 2
   until:
-    - consul_leader is succeeded
-    - consul_leader.content | trim | length > 0
+  - consul_leader is succeeded
+  - consul_leader.content | trim | length > 0

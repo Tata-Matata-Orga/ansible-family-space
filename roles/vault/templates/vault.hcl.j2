@@ -7,17 +7,17 @@ ui = true
 # That agent abstracts the cluster and forwards requests to the
 # current leader as needed.
 #
-# Network endpoint (https(s)://host:port) defines *where* Vault reaches Consul.
-# The path defines *where inside Consul's KV store* Vault data lives.
+# address is network endpoint (https(s)://host:port) where Vault reaches Consul.
+# path defines where inside Consul's KV store Vault data lives.
 storage "consul" {
   address = "{{ consul_agent_api_scheme }}://{{ consul_addr_that_vault_connects_to }}:{{ consul_port_that_vault_connects_to }}"
   path    = "{{ vault_prefix_in_consul_store }}"
 
-  {% if consul_tls_enabled %}
-  # TLS / mTLS for Vault → Consul
-  tls_ca_file   = "{{ vault_tls_dir }}/ca.pem"
-  tls_cert_file = "{{ vault_tls_dir }}/consul-client/client.pem"
-  tls_key_file  = "{{ vault_tls_dir }}/consul-client/client.key"
+  {% if vault_tls_enabled %}
+  # mTLS for Vault → Consul
+  tls_ca_file   = "{{ vault_ca_cert_path }}"
+  tls_cert_file = "{{ vault_client_auth_to_consul_cert_path }}"
+  tls_key_file  = "{{ vault_client_auth_to_consul_key_path }}"
   {% endif %}
 }
 
@@ -27,17 +27,17 @@ listener "tcp" {
   address     = "0.0.0.0:{{ vault_api_port }}"
   {% if vault_api_scheme == 'https' %}
   tls_disable = 0
-  tls_cert_file = "{{ vault_tls_dir }}/vault.pem"
-  tls_key_file  = "{{ vault_tls_dir }}/vault.key"
-  # With CA file specified, we wil have mTLS: Vault will require every client to present a TLS client certificate.
-  tls_client_ca_file = "{{ vault_tls_dir }}/ca.pem"
+  tls_cert_file = "{{ vault_server_cert_path }}"
+  tls_key_file  = "{{ vault_server_key_path }}"
+  # With CA file specified, Vault will require every client to present a TLS client certificate.
+  tls_client_ca_file = "{{ vault_ca_cert_path }}"
   {% else %}
   tls_disable = 1
   {% endif %}
 }
 
-api_addr = "{{ vault_api_scheme | default('http') }}://{{ vault_private_ip }}:{{ vault_api_port }}"
-cluster_addr = "{{ vault_api_scheme | default('http') }}://{{ vault_private_ip }}:{{ vault_cluster_port }}"
+api_addr = "{{ vault_api_addr }}"
+cluster_addr = "{{ vault_cluster_addr }}"
 
 disable_mlock = true
 

@@ -1,0 +1,9 @@
+Test:
+
+Unauthenticated requests → DENIED
+
+Vault token → works
+
+Random node → cannot write KV
+
+If this step passes, you’re officially out of bootstrap land.

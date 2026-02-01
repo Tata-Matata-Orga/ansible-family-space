@@ -1,0 +1,9 @@
+Using management token:
+
+Vault token
+
+Consul-server token (if needed)
+
+Later: K8s tokens
+
+Attach policies explicitly.

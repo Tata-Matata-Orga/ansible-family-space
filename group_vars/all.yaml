@@ -24,17 +24,19 @@ vault_client_cert_file: vault-client.pem
 # Address advertised by the Consul agent for client access
 # HTTP/HTTPS API
 # used by Vault, Bastion, kubectl plugins, etc.
-consul_client_addr: "{{ hostvars[groups['consul'][0]].ansible_host }}"
+consul_api_addr: "{{ consul_agent_api_scheme }}://{{ hostvars[groups['consul'][0]].ansible_host }}: {{ consul_agent_api_port }}"
 
 # Port of the Consul agent API 
 consul_agent_api_port: 8500
 
 # HTTP or HTTPS depending on TLS phase
-consul_agent_api_scheme: "{{ 'https' if consul_agent_tls_enabled else 'http' }}"
+consul_agent_api_scheme: "{{ 'https' if consul_tls_enabled else 'http' }}"
 
 # TLS lifecycle flag (flipped by bootstrap-tls playbook via set_fact)
-consul_agent_tls_enabled: false
+consul_tls_enabled: false
 
+consul_api_health_path: /v1/agent/self
+consul_api_leader_path: /v1/status/leader
 
 ######################################################
 ######### Vault  #####################################
@@ -45,14 +47,14 @@ vault_cluster_port: 8201
 
 vault_api_health_path: /v1/sys/health
 
-# HTTP or HTTPS depending on TLS phase
-vault_agent_api_scheme: "{{ 'https' if vault_agent_tls_enabled else 'http' }}"
-
-vault_api_addr: "{{ vault_agent_api_scheme }}://{{ ansible_default_ipv4.address }}:{{ vault_api_port }}"
-vault_cluster_addr: "{{ vault_agent_api_scheme }}://{{ ansible_default_ipv4.address }}:{{ vault_cluster_port}}"
-
 # TLS lifecycle flag (flipped by bootstrap-tls playbook via set_fact)
-vault_agent_tls_enabled: false
+vault_tls_enabled: false
+
+# HTTP or HTTPS depending on TLS phase
+vault_api_scheme: "{{ 'https' if vault_tls_enabled else 'http' }}"
+
+vault_api_addr: "{{ vault_api_scheme }}://{{ ansible_default_ipv4.address }}:{{ vault_api_port }}"
+vault_cluster_addr: "{{ vault_api_scheme }}://{{ ansible_default_ipv4.address }}:{{ vault_cluster_port}}"
 
 ######################################################
 ######### Consul-Vault  ##############################
@@ -63,5 +65,3 @@ consul_port_that_vault_connects_to: "{{ consul_agent_api_port }}"
 
 #key prefix inside Consul’s KV store where Vault data will be stored
 vault_prefix_in_consul_store: "vault/"
-
-

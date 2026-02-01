@@ -24,7 +24,6 @@
 #   - Consul server certificate + private key
 # Rewrite Consul config: HTTP → HTTPS (API), Restart Consul
 
-
 # Should fail if Vault already has TLS enabled
 # The playbook must never be rerun after TLS bootstrap is completed
 - name: Pre-flight checks on Vault
@@ -33,20 +32,20 @@
   become: false
 
   tasks:
-    - name: Health check on Vault http endpoint and initialization status
-      block:
-        - import_tasks: ../tasks/bootstrap-tls-vault-consul/00_preflight_checks_vault_api.yaml
+  - name: Health check on Vault http endpoint and initialization status
+    block:
+    - import_tasks: ../tasks/bootstrap-tls-vault-consul/00_preflight_checks_vault_api.yaml
 
 - name: Pre-flight bootstrap marker check on Bastion
   hosts: bastion
   gather_facts: false
-  become: false 
+  become: false
   vars_files:
   - ../vars/bootstrap-tls-vault-consul.yaml
   tasks:
   - name: Check bootstrap marker file exists on Bastion
     block:
-      - import_tasks: ../tasks/bootstrap-tls-vault-consul/00_preflight_checks_bastion_marker.yaml
+    - import_tasks: ../tasks/bootstrap-tls-vault-consul/00_preflight_checks_bastion_marker.yaml
 
 # On Bastion generate:
 # CA private key, CA certificate + TTL on
@@ -64,46 +63,44 @@
   - ../vars/bootstrap-tls-vault-consul.yaml
   tasks:
 
-    # CA generation (once)
-    - name: Generate bootstrap TLS CA
-      import_tasks: ../tasks/bootstrap-tls-vault-consul/10_generate_ca.yaml
+  # CA generation (once)
+  - name: Generate bootstrap TLS CA
+    import_tasks: ../tasks/bootstrap-tls-vault-consul/10_generate_ca.yaml
 
-    # Vault server cert issuance (per Vault host)
-    - name: Issue Vault server TLS certificates
-      import_tasks: ../tasks/bootstrap-tls-vault-consul/20_issue_vault_cert.yaml
-      loop: "{{ groups['vault'] }}"
-      loop_control:
-        loop_var: vault_host
+  # Vault server cert issuance (per Vault host)
+  - name: Issue Vault server TLS certificates
+    import_tasks: ../tasks/bootstrap-tls-vault-consul/20_issue_vault_cert.yaml
+    loop: "{{ groups['vault'] }}"
+    loop_control:
+      loop_var: vault_host
 
-    # Consul server cert issuance (per Consul host)
-    - name: Issue Consul server TLS certificates
-      import_tasks: ../tasks/bootstrap-tls-vault-consul/21_issue_consul_cert.yaml
-      loop: "{{ groups['consul'] }}"
-      loop_control:
-        loop_var: consul_host
+  # Consul server cert issuance (per Consul host)
+  - name: Issue Consul server TLS certificates
+    import_tasks: ../tasks/bootstrap-tls-vault-consul/21_issue_consul_cert.yaml
+    loop: "{{ groups['consul'] }}"
+    loop_control:
+      loop_var: consul_host
 
-    # Client cert issuance Vault (client) --> Consul (server) (per Vault host)
-    - name: Issue Vault client TLS certificates (Vault → Consul)
-      import_tasks: 22_issue_certs_for_consul_clients.yaml
-      loop: "{{ groups['vault'] }}"
-      loop_control:
-        loop_var: client_host    
+  # Client cert issuance Vault (client) --> Consul (server) (per Vault host)
+  - name: Issue Vault client TLS certificates (Vault → Consul)
+    import_tasks: 22_issue_certs_for_consul_clients.yaml
+    loop: "{{ groups['vault'] }}"
+    loop_control:
+      loop_var: client_host
 
-    # Client cert issuance Bastion (client) --> Consul (server)  (per Bastion host)
-    - name: Issue Bastion client TLS certificate (Bastion → Consul)
-      import_tasks: 22_issue_certs_for_consul_clients.yaml
-      loop: "{{ groups['bastion'] }}"
-      loop_control:
-        loop_var: client_host
+  # Client cert issuance Bastion (client) --> Consul (server)  (per Bastion host)
+  - name: Issue Bastion client TLS certificate (Bastion → Consul)
+    import_tasks: 22_issue_certs_for_consul_clients.yaml
+    loop: "{{ groups['bastion'] }}"
+    loop_control:
+      loop_var: client_host
 
-    # Client cert issuance Bastion --> Vault (per Bastion host)
-    - name: Issue Bastion client certificate for Vault mTLS
-      import_tasks: 23_issue_bastion_vault_client_cert.yaml
-      loop: "{{ groups['bastion'] }}"
-      loop_control:
-        loop_var: bastion_host
-
-
+  # Client cert issuance Bastion --> Vault (per Bastion host)
+  - name: Issue Bastion client certificate for Vault mTLS
+    import_tasks: 23_issue_bastion_vault_client_cert.yaml
+    loop: "{{ groups['bastion'] }}"
+    loop_control:
+      loop_var: bastion_host
 
 # Distribute Vault TLS material from Bastion to Vault
 - name: Copy Vault TLS material from Bastion to Vault
@@ -111,11 +108,11 @@
   gather_facts: true
   become: true
   vars_files:
-    - ../vars/bootstrap-tls-vault-consul.yaml
+  - ../vars/bootstrap-tls-vault-consul.yaml
 
   tasks:
-    - name: Copy Vault TLS material from Bastion to Vault
-      import_tasks: ../tasks/bootstrap-tls-vault-consul/30_distribute_tls_vault.yaml
+  - name: Copy Vault TLS material from Bastion to Vault
+    import_tasks: ../tasks/bootstrap-tls-vault-consul/30_distribute_tls_vault.yaml
 
 # Distribute Consul TLS material from Bastion to Consul
 - name: Copy Consul TLS material from Bastion to Consul
@@ -123,11 +120,11 @@
   gather_facts: true
   become: true
   vars_files:
-    - ../vars/bootstrap-tls-vault-consul.yaml
+  - ../vars/bootstrap-tls-vault-consul.yaml
 
   tasks:
-    - name: Copy Consul TLS material from Bastion to Consul
-      import_tasks: ../tasks/bootstrap-tls-vault-consul/31_distribute_tls_consul.yaml
+  - name: Copy Consul TLS material from Bastion to Consul
+    import_tasks: ../tasks/bootstrap-tls-vault-consul/31_distribute_tls_consul.yaml
 
 # Install Bastion client TLS material for Consul mTLS on each Bastion host
 - name: Install Bastion client TLS material for Consul and Vault on each Bastion host
@@ -135,44 +132,13 @@
   gather_facts: true
   become: true
   vars_files:
-    - ../vars/bootstrap-tls-vault-consul.yaml
+  - ../vars/bootstrap-tls-vault-consul.yaml
 
   tasks:
-    - name: Install Bastion client certificate for Consul mTLS
-      import_tasks: ../tasks/bootstrap-tls-vault-consul/33_distribute_tls_to_other_bastions.yaml
+  - name: Install Bastion client certificate for Consul mTLS
+    import_tasks: ../tasks/bootstrap-tls-vault-consul/33_distribute_tls_to_other_bastions.yaml
 
-# Reconfigure Vault + Consul to use TLS
-- name: Enable TLS in Vault
-  hosts: vault
-  gather_facts: false
-  become: true
-  tasks:
-    - import_tasks: ../tasks/bootstrap-tls-vault-consul/40_reconfigure_vault_for_tls.yaml
-
-
-- name: Enable TLS in Consul
-  hosts: consul
-  gather_facts: false
-  become: true
-  tasks:
-    - import_tasks: ../tasks/bootstrap-tls-vault-consul/41_reconfigure_consul_for_tls.yaml
-
-
-# HTTPS health check on Vault, mark bootstrap as complete
-# CA validation
-- name: Verify TLS and record bootstrap completion
-  hosts: vault
-  gather_facts: false
-  become: false
-
-  tasks:
-    - name: Verify TLS is active and mark completion
-      block:
-        - import_tasks: ../tasks/bootstrap-tls-vault-consul/90_verify_and_mark.yaml
-
-
-# Change Vault API scheme to HTTPS for subsequent plays
-# The initial value is defined in group_vars/ as "http"
-- name: Persist Vault API scheme as HTTPS for subsequent plays
-  set_fact:
-    vault_api_scheme: https
+# Reconfigure and restart Vault + Consul to use TLS
+- import_playbook: 40_reconfigure_consul_for_tls.yaml
+- import_playbook: 41_reconfigure_vault_for_tls.yaml
+- import_playbook: 90_verify_and_mark.yaml
