@@ -139,7 +139,7 @@
 
   tasks:
     - name: Install Bastion client certificate for Consul mTLS
-      import_tasks: ../tasks/bootstrap-tls-vault-consul/33_distribute_tls_bastion_client.yaml
+      import_tasks: ../tasks/bootstrap-tls-vault-consul/33_distribute_tls_to_other_bastions.yaml
 
 # Reconfigure Vault + Consul to use TLS
 - name: Enable TLS in Vault

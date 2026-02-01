@@ -27,16 +27,6 @@ consul_internal_bind_addr: "{{ ansible_default_ipv4.address }}"
 # used only for Consul ↔ Consul communication
 consul_internal_advertise_addr: "{{ ansible_default_ipv4.address }}"
 
-
-
-# TLS configuration
-consul_server_cert_file: consul.pem
-consul_server_key_file: consul.key
-consul_server_cert_path: "{{ consul_tls_dir }}/{{ consul_server_cert_file }}"
-consul_server_key_path: "{{ consul_tls_dir }}/{{ consul_server_key_file }}"
-consul_ca_cert_path: "{{ consul_tls_dir }}/{{ ca_cert_file }}"
-
-
 # Installation and configuration
 consul_version: "1.22.2"
 
@@ -47,9 +37,19 @@ consul_group: consul
 # Paths
 consul_data_dir: /opt/consul/data
 consul_config_dir: /etc/consul.d
-consul_tls_dir: /etc/consul.d/tls
 consul_install_dir: /usr/local/bin
 consul_binary_path: "{{consul_install_dir}}/consul"
+
+# TLS configuration
+consul_tls_dir: /etc/consul.d/tls
+consul_server_cert_file: consul.pem
+consul_server_key_file: consul.key
+consul_server_cert_path: "{{ consul_tls_dir }}/{{ consul_server_cert_file }}"
+consul_server_key_path: "{{ consul_tls_dir }}/{{ consul_server_key_file }}"
+consul_ca_cert_path: "{{ consul_tls_dir }}/{{ ca_cert_file }}"
+
+
+
 
 # Logging
 consul_log_level: INFO

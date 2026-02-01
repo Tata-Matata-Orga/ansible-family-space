@@ -18,7 +18,7 @@
 
 - name: Copy CA certificate to Consul
   copy:
-    src: "{{ ca_cert_path_on_bastion }}"
+    src: "{{ bastion_ca_cert_path }}"
     dest: "{{ consul_ca_cert_path }}"
     owner: root
     group: root
@@ -33,7 +33,7 @@
 
 - name: Copy Consul TLS certificate
   copy:
-    src: "{{ bootstrap_tls_dir }}/consul/{{ inventory_hostname }}/{{consul_cert_file}}"
+    src: "{{ bastion_tmp_tls_dir_for_consul }}/{{ inventory_hostname }}/{{consul_server_cert_file}}"
     dest: "{{ consul_server_cert_path }}"
     owner: consul
     group: consul
@@ -43,7 +43,7 @@
 
 - name: Copy Consul TLS private key
   copy:
-    src: "{{ bootstrap_tls_dir }}/consul/{{ inventory_hostname }}/{{consul_key_file}}"
+    src: "{{ bastion_tmp_tls_dir_for_consul }}/{{ inventory_hostname }}/{{consul_server_key_file}}"
     dest: "{{ consul_server_key_path }}"
     owner: consul
     group: consul

@@ -1,13 +1,12 @@
 ###############################################################################
 # Issue Bastion client certificate on Bastion primary server (to distribute later to each Bastion)
 # For Bastion to authenticate to Vault API via mTLS as client
-#
 ###############################################################################
 
 
-- name: Ensure Bastion Vault client TLS directory exists on Bastion
+- name: Ensure temp Bastion Vault client TLS directory exists on primary Bastion server
   file:
-    path: "{{ bootstrap_vault_client_certs_folder_on_bastion }}"
+    path: "{{ bastion_tmp_tls_dir_for_vault_clients }}"
     state: directory
     owner: root
     group: root
@@ -20,7 +19,7 @@
 
 - name: Generate Bastion Vault client private key
   community.crypto.openssl_privatekey:
-    path: "{{ bootstrap_vault_client_key_path_on_bastion }}"
+    path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_key_file }}"
     type: ed25519
     owner: root
     group: root
@@ -42,27 +41,27 @@
 # CSR
 ###############################################################################
 
-- name: Generate Bastion Vault client CSR
+- name: Generate client TLS CSR
   community.crypto.openssl_csr:
-    path: "{{ bootstrap_vault_client_certs_folder_on_bastion }}/client.csr"
-    privatekey_path: "{{ bootstrap_vault_client_key_path_on_bastion }}"
+    path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/client.csr"
+    privatekey_path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_key_file }}"
     subject:
-      common_name: "bastion-vault-client"
-      organization_name: "vault-client"
-    subject_alt_name: "{{ bastion_vault_client_sans }}"
+      common_name: "{{ client_name }}"
+      organization_name: "consul-client"
+    subject_alt_name: "{{ client_tls_sans }}"
 
 
 ###############################################################################
 # Sign certificate
 ###############################################################################
 
-- name: Sign Bastion Vault client certificate with bootstrap CA
+- name: Sign client TLS certificate with bootstrap CA
   community.crypto.openssl_certificate:
-    path: "{{ bootstrap_vault_client_cert_path_on_bastion }}"
-    csr_path: "{{ bootstrap_vault_client_certs_folder_on_bastion }}/client.csr"
+    path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_cert_file }}"
+    csr_path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/client.csr"
     provider: ownca
-    ownca_path: "{{ ca_cert_path_on_bastion }}"
-    ownca_privatekey_path: "{{ ca_cert_key_on_bastion }}"
+    ownca_path: "{{ bastion_ca_cert_path }}"
+    ownca_privatekey_path: "{{ bastion_ca_key_path }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
 
 
@@ -74,8 +73,8 @@
   stat:
     path: "{{ item }}"
   loop:
-     - "{{ bootstrap_vault_client_cert_path_on_bastion }}"
-     - "{{ bootstrap_vault_client_key_path_on_bastion }}"
+     - "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_cert_file }}"
+     - "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_key_file }}"
   register: tls_files
   changed_when: false
   failed_when: not tls_files.stat.exists

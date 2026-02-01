@@ -1,10 +1,7 @@
 ###############################################################################
 # After generating client certificates for Bastion to auth to Consul and Vault on Bastion primary host,
-###############################################################################
 # we need to distribute the TLS material to all Bastion hosts.
 ###############################################################################
-
-
 
 ###############################################################################
 ## CA cert from primary Bastion to all Bastion hosts
@@ -19,67 +16,69 @@
     mode: "0700"
 
 
-- name: Copy CA certificate
+- name: Copy CA certificate from primary Bastion to this Bastion
   copy:
-    src: "{{ ca_cert_path_on_bastion }}"
+    src: "{{ bastion_ca_cert_path }}"
     dest: "{{ bastion_ca_cert_path }}"
     owner: root
     group: root
     mode: "0644"
     remote_src: yes
+  delegate_to: "{{ bastion_primary_host }}"
 
 
-
-
-# Bastion → Consul
+# Bastion to Consul auth certs
 ###############################################################################
 ######## USAGE ################################################################
-# export CONSUL_CACERT=/etc/consul-client/ca.pem
-# export CONSUL_CLIENT_CERT=/etc/consul-client/client.pem
-# export CONSUL_CLIENT_KEY=/etc/consul-client/client.key
+# export CONSUL_CACERT={{ bastion_ca_cert_path }}
+# export CONSUL_CLIENT_CERT={{ bastion_client_auth_to_consul_cert_path }}
+# export CONSUL_CLIENT_KEY={{ bastion_client_auth_to_consul_key_path }}
 ###############################################################################
 
-- name: Ensure Bastion TLS directory exists
+- name: Ensure TLS directory for Consul client certs exists on Bastion
   file:
-    path: "{{ bastion_tls_dir }}/consul-client"
+    path: "{{ bastion_client_auth_to_consul_certs_dir }}"
     state: directory
     owner: root
     group: root
     mode: "0700"
 
 
-- name: Copy Bastion client certificate
+- name: Copy Bastion client certificate from primary Bastion to this Bastion
   copy:
-    src: "{{ bootstrap_tls_dir }}/clients/bastion/client.pem"
-    dest: "{{ bastion_tls_dir }}/consul-client/client.pem"
+    src: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ inventory_hostname }}/{{ consul_client_cert_file }}"
+    dest: "{{ bastion_client_auth_to_consul_cert_path }}"
     owner: root
     group: root
     mode: "0644"
     remote_src: yes
+  delegate_to: "{{ bastion_primary_host }}"
 
 
-- name: Copy Bastion client private key
+- name: Copy Bastion client private key from primary Bastion to this Bastion
   copy:
-    src: "{{ bootstrap_tls_dir }}/clients/bastion/client.key"
-    dest: "{{ bastion_tls_dir }}/consul-client/client.key"
+    src: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ inventory_hostname }}/{{ consul_client_key_file }}"
+    dest: "{{ bastion_client_auth_to_consul_key_path }}"
     owner: root
     group: root
     mode: "0600"
     remote_src: yes
+  delegate_to: "{{ bastion_primary_host }}"
 
 ###############################################################################
 #  Bastion → Vault
 ###############################################################################
+
 ################ USAGE ########################################################
 # export VAULT_ADDR=https://{{ vault_private_ip }}:{{ vault_api_port }}
-# export VAULT_CACERT={{ ca_cert_path_on_bastion }}
-# export VAULT_CLIENT_CERT={{ bastion_vault_client_cert_path }}
-# export VAULT_CLIENT_KEY={{ bastion_vault_client_key_path }}
+# export VAULT_CACERT={{ bastion_ca_cert_path }}
+# export VAULT_CLIENT_CERT={{ bastion_client_auth_to_vault_cert_path }}
+# export VAULT_CLIENT_KEY={{ bastion_client_auth_to_vault_key_path }}
 ###############################################################################
 
 - name: Ensure Bastion TLS directory exists
   file:
-    path: "{{ bastion_vault_client_certs_dir }}"
+    path: "{{ bastion_client_auth_to_vault_certs_dir }}"
     state: directory
     owner: root
     group: root
@@ -87,19 +86,21 @@
 
 - name: Copy Bastion Vault client certificate
   copy:
-    src: "{{ bootstrap_vault_client_cert_path_on_bastion }}"
-    dest: "{{ bastion_vault_client_cert_path }}"
+    src: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ inventory_hostname }}/{{ vault_client_cert_file }}"
+    dest: "{{ bastion_client_auth_to_vault_cert_path }}"
     owner: root
     group: root
     mode: "0644"
     remote_src: yes
+  delegate_to: "{{ bastion_primary_host }}"
 
 
 - name: Copy Bastion Vault client private key
   copy:
-    src: "{{ bootstrap_vault_client_key_path_on_bastion }}"
-    dest: "{{ bastion_vault_client_key_path }}"
+    src: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ inventory_hostname }}/{{ vault_client_key_file }}"
+    dest: "{{ bastion_client_auth_to_vault_key_path }}"
     owner: root
     group: root
     mode: "0600"
     remote_src: yes
+  delegate_to: "{{ bastion_primary_host }}"
