@@ -7,6 +7,13 @@ bastion_primary_host: >-
     | first
   }}
 
+### Common TLS paths used by both Vault and Consul ###
+
+ca_cert_file: ca.pem
+ca_key_file: ca.key
+
+consul_client_key_file: consul-client.key
+consul_client_cert_file: consul-client.pem
 
 ######################################################
 ######### Consul  ####################################

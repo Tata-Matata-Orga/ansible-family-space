@@ -25,7 +25,7 @@
 ###############################################################################
 - name: Copy CA certificate to Vault
   copy:
-    src: "{{ ca_cert_path_on_bastion }}"
+    src: "{{ bastion_ca_cert_path }}"
     dest: "{{ vault_ca_cert_path}}"
     owner: root
     group: root
@@ -40,7 +40,7 @@
 
 - name: Copy Vault TLS certificate
   copy:
-    src: "{{ bootstrap_tls_dir }}/vault/{{ inventory_hostname }}/{{vault_server_cert_file}}"
+    src: "{{ bastion_tmp_tls_dir_for_vault }}/{{ inventory_hostname }}/{{vault_server_cert_file}}"
     dest: "{{ vault_server_cert_path }}"
     owner: vault
     group: vault
@@ -50,7 +50,7 @@
 
 - name: Copy Vault TLS private key
   copy:
-    src: "{{ bootstrap_tls_dir }}/vault/{{ inventory_hostname }}/{{vault_server_key_file}}"
+    src: "{{ bastion_tmp_tls_dir_for_vault }}/{{ inventory_hostname }}/{{vault_server_key_file}}"
     dest: "{{ vault_server_key_path }}"
     owner: vault
     group: vault
@@ -59,13 +59,21 @@
   delegate_to: "{{ bastion_primary_host }}"
 
 ###############################################################################
-# Distribute Vault client certificate & key (used for Consul mTLS)  from primary Bastion to Vault
+# Distribute Vault client certificate & key (used for auth to Consul)  from primary Bastion to Vault
 ###############################################################################
 
-- name: Copy Vault client certificate generated for Consul mTLS from Bastion to Vault
+- name: Ensure Vault directory for Consul client certs exists
+  file:
+    path: "{{ vault_client_auth_to_consul_certs_dir }}"
+    state: directory
+    owner: vault
+    group: vault
+    mode: "0750"
+
+- name: Copy Vault client certificate generated for auth to Consul from Bastion to Vault
   copy:
-    src: "{{ bootstrap_tls_dir }}/{{ consul_client_cert_dir }}/{{ inventory_hostname }}/{{consul_client_cert_file}}"
-    dest: "{{ vault_client_cert_path_for_consul }}"
+    src: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ inventory_hostname }}/{{consul_client_cert_file}}"
+    dest: "{{ vault_client_auth_to_consul_cert_path }}"
     owner: vault
     group: vault
     mode: "0644"
@@ -75,8 +83,8 @@
 
 - name: Copy Vault client private key
   copy:
-    src: "{{ bootstrap_tls_dir }}/{{ consul_client_cert_dir }}/{{ inventory_hostname }}/{{consul_client_key_file}}"
-    dest: "{{ vault_client_key_path_for_consul }}"
+    src: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ inventory_hostname }}/{{consul_client_key_file}}"
+    dest: "{{ vault_client_auth_to_consul_key_path }}"
     owner: vault
     group: vault
     mode: "0600"
@@ -94,8 +102,8 @@
      - "{{ vault_ca_cert_path }}"
      - "{{ vault_server_cert_path }}"
      - "{{ vault_server_key_path }}"
-     - "{{ vault_client_cert_path_for_consul }}"
-     - "{{ vault_client_key_path_for_consul }}"
+     - "{{ vault_client_auth_to_consul_cert_path }}"
+     - "{{ vault_client_auth_to_consul_key_path }}"
   register: tls_files
   changed_when: false
   failed_when: not tls_files.stat.exists

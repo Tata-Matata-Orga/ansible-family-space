@@ -1,17 +1,2 @@
-# Version
-consul_version: "1.22.2"
 
-# User / group
-consul_user: consul
-consul_group: consul
-
-# Paths
-consul_data_dir: /opt/consul/data
-consul_config_dir: /etc/consul.d
-consul_tls_dir: /etc/consul.d/tls
-consul_install_dir: /usr/local/bin
-consul_binary_path: "{{consul_install_dir}}/consul"
-
-# Logging
-consul_log_level: INFO
 

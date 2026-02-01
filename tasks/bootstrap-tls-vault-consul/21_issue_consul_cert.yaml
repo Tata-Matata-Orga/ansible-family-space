@@ -3,9 +3,9 @@
 #
 ###############################################################################
 
-- name: Ensure Consul TLS directory exists (on Bastion)
+- name: Ensure tmp Consul TLS directory exists on Bastion
   file:
-    path: "{{ bootstrap_tls_dir }}/consul/{{ consul_host }}"
+    path: "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}"
     state: directory
     owner: root
     group: root
@@ -18,7 +18,7 @@
 
 - name: Generate Consul TLS private key
   community.crypto.openssl_privatekey:
-    path: "{{ bootstrap_tls_dir }}/consul/{{ consul_host }}/{{ consul_server_key_file }}"
+    path: "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}/{{ consul_server_key_file }}"
     type: ed25519
     owner: root
     group: root
@@ -43,8 +43,8 @@
 
 - name: Generate Consul TLS CSR
   community.crypto.openssl_csr:
-    path: "{{ bootstrap_tls_dir }}/consul/{{ consul_host }}/consul.csr"
-    privatekey_path: "{{ bootstrap_tls_dir }}/consul/{{ consul_host }}/{{ consul_server_cert_file }}"
+    path: "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}/consul.csr"
+    privatekey_path: "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}/{{ consul_server_key_file }}"
     subject:
       common_name: "{{ consul_host }}"
       organization_name: "consul"
@@ -57,11 +57,11 @@
 
 - name: Sign Consul TLS certificate with bootstrap CA
   community.crypto.openssl_certificate:
-    path: "{{ bootstrap_tls_dir }}/consul/{{ consul_host }}/{{ consul_server_cert_file }}"
-    csr_path: "{{ bootstrap_tls_dir }}/consul/{{ consul_host }}/consul.csr"
+    path: "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}/{{ consul_server_cert_file }}"
+    csr_path: "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}/consul.csr"
     provider: ownca
-    ownca_path: "{{ ca_cert_path_on_bastion }}"
-    ownca_privatekey_path: "{{ ca_key_path_on_bastion }}"
+    ownca_path: "{{ bastion_ca_cert_path }}"
+    ownca_privatekey_path: "{{ bastion_ca_key_path }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
 
 
@@ -73,8 +73,8 @@
   stat:
     path: "{{ item }}"
   loop:
-     - "{{ bootstrap_tls_dir }}/consul/{{ consul_host }}/{{ consul_server_cert_file }}"
-     - "{{ bootstrap_tls_dir }}/consul/{{ consul_host }}/{{ consul_server_key_file }}"
+     - "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}/{{ consul_server_cert_file }}"
+     - "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}/{{ consul_server_key_file }}"
   register: tls_files
   changed_when: false
   failed_when: not tls_files.stat.exists

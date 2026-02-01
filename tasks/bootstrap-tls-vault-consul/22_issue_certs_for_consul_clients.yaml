@@ -8,7 +8,7 @@
 
 - name: Ensure client TLS directory exists on Bastion
   file:
-    path: "{{ bootstrap_tls_dir }}/{{ consul_client_cert_dir }}/{{ client_name }}"
+    path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}"
     state: directory
     owner: root
     group: root
@@ -21,7 +21,7 @@
 
 - name: Generate client TLS private key for Consul client
   community.crypto.openssl_privatekey:
-    path: "{{ bootstrap_tls_dir }}/{{ consul_client_cert_dir }}/{{ client_name }}/{{ consul_client_key_file }}"
+    path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_key_file }}"
     type: ed25519
     owner: root
     group: root
@@ -45,8 +45,8 @@
 
 - name: Generate client TLS CSR
   community.crypto.openssl_csr:
-    path: "{{ bootstrap_tls_dir }}/{{ consul_client_cert_dir }}/{{ client_name }}/client.csr"
-    privatekey_path: "{{ bootstrap_tls_dir }}/clients/{{ client_name }}/{{ consul_client_key_file }}"
+    path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/client.csr"
+    privatekey_path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_key_file }}"
     subject:
       common_name: "{{ client_name }}"
       organization_name: "consul-client"
@@ -59,11 +59,11 @@
 
 - name: Sign client TLS certificate with bootstrap CA
   community.crypto.openssl_certificate:
-    path: "{{ bootstrap_tls_dir }}/{{ consul_client_cert_dir }}/{{ client_name }}/{{ consul_client_cert_file }}"
-    csr_path: "{{ bootstrap_tls_dir }}/{{consul_client_cert_dir }}/{{ client_name }}/client.csr"
+    path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_cert_file }}"
+    csr_path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/client.csr"
     provider: ownca
-    ownca_path: "{{ bootstrap_tls_dir }}/{{ca_cert_file}}"
-    ownca_privatekey_path: "{{ bootstrap_tls_dir }}/{{ca_key_file}}"
+    ownca_path: "{{ bastion_ca_cert_path }}"
+    ownca_privatekey_path: "{{ bastion_ca_key_path }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
 
 
@@ -71,14 +71,12 @@
 # Sanity checks
 ###############################################################################
 
-- name: Assert client TLS certificate was created
+- name: Assert Consul client certificate and key were created
   stat:
-    path: "{{ bootstrap_tls_dir }}/{{ consul_client_cert_dir }}/{{ client_name }}/{{consul_client_cert_file}}"
-  register: client_cert_stat
+    path: "{{ item }}"
+  loop:
+     - "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_cert_file }}"
+     - "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_key_file }}"
+  register: tls_files
   changed_when: false
-
-- name: Fail if client TLS certificate missing
-  fail:
-    msg: >
-      Client TLS certificate was not created for {{ client_name }}.
-  when: not client_cert_stat.stat.exists
+  failed_when: not tls_files.stat.exists

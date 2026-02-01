@@ -5,7 +5,7 @@
 ######################################################################################
 - name: Check if bootstrap TLS marker exists on Bastion
   stat:
-    path: "{{ bootstrap_tls_dir }}/BOOTSTRAP_COMPLETE"
+    path: "{{ bastion_tls_dir }}/BOOTSTRAP_COMPLETE"
   register: bootstrap_marker
   changed_when: false
 

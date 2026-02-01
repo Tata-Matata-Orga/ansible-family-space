@@ -5,9 +5,9 @@
 ###############################################################################
 
 
-- name: Ensure Bastion Vault client TLS directory exists (on Bastion)
+- name: Ensure Bastion Vault client TLS directory exists on Bastion
   file:
-    path: "{{ bootstrap_tls_dir }}/clients/bastion-vault"
+    path: "{{ bootstrap_vault_client_certs_folder_on_bastion }}"
     state: directory
     owner: root
     group: root
@@ -20,7 +20,7 @@
 
 - name: Generate Bastion Vault client private key
   community.crypto.openssl_privatekey:
-    path: "{{ bootstrap_tls_dir }}/clients/bastion-vault/client.key"
+    path: "{{ bootstrap_vault_client_key_path_on_bastion }}"
     type: ed25519
     owner: root
     group: root
@@ -44,8 +44,8 @@
 
 - name: Generate Bastion Vault client CSR
   community.crypto.openssl_csr:
-    path: "{{ bootstrap_tls_dir }}/clients/bastion-vault/client.csr"
-    privatekey_path: "{{ bootstrap_tls_dir }}/clients/bastion-vault/client.key"
+    path: "{{ bootstrap_vault_client_certs_folder_on_bastion }}/client.csr"
+    privatekey_path: "{{ bootstrap_vault_client_key_path_on_bastion }}"
     subject:
       common_name: "bastion-vault-client"
       organization_name: "vault-client"
@@ -58,11 +58,11 @@
 
 - name: Sign Bastion Vault client certificate with bootstrap CA
   community.crypto.openssl_certificate:
-    path: "{{ bootstrap_tls_dir }}/clients/bastion-vault/client.pem"
-    csr_path: "{{ bootstrap_tls_dir }}/clients/bastion-vault/client.csr"
+    path: "{{ bootstrap_vault_client_cert_path_on_bastion }}"
+    csr_path: "{{ bootstrap_vault_client_certs_folder_on_bastion }}/client.csr"
     provider: ownca
-    ownca_path: "{{ bootstrap_tls_dir }}/ca.pem"
-    ownca_privatekey_path: "{{ bootstrap_tls_dir }}/ca.key"
+    ownca_path: "{{ ca_cert_path_on_bastion }}"
+    ownca_privatekey_path: "{{ ca_cert_key_on_bastion }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
 
 
@@ -70,14 +70,12 @@
 # Sanity checks
 ###############################################################################
 
-- name: Assert Bastion Vault client certificate was created
+- name: Assert required TLS files exist
   stat:
-    path: "{{ bootstrap_tls_dir }}/clients/bastion-vault/client.pem"
-  register: bastion_vault_client_cert_stat
+    path: "{{ item }}"
+  loop:
+     - "{{ bootstrap_vault_client_cert_path_on_bastion }}"
+     - "{{ bootstrap_vault_client_key_path_on_bastion }}"
+  register: tls_files
   changed_when: false
-
-- name: Fail if Bastion Vault client certificate missing
-  fail:
-    msg: >
-      Bastion Vault client TLS certificate was not created.
-  when: not bastion_vault_client_cert_stat.stat.exists
+  failed_when: not tls_files.stat.exists

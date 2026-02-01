@@ -7,7 +7,7 @@
 
 - name: Ensure Vault TLS directory exists (on Bastion)
   file:
-    path: "{{ bootstrap_tls_dir }}/vault/{{ vault_host }}"
+    path: "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}"
     state: directory
     owner: root
     group: root
@@ -20,7 +20,7 @@
 
 - name: Generate Vault TLS private key
   community.crypto.openssl_privatekey:
-    path: "{{ bootstrap_tls_dir }}/vault/{{ vault_host }}/{{vault_server_key_file}}"
+    path: "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/{{vault_server_key_file}}"
     type: ed25519
     owner: root
     group: root
@@ -44,8 +44,8 @@
 
 - name: Generate Vault TLS CSR
   community.crypto.openssl_csr:
-    path: "{{ bootstrap_tls_dir }}/vault/{{ vault_host }}/vault.csr"
-    privatekey_path: "{{ bootstrap_tls_dir }}/vault/{{ vault_host }}/{{vault_server_key_file}}"
+    path: "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/vault.csr"
+    privatekey_path: "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/{{vault_server_key_file}}"
     subject:
       common_name: "{{ vault_host }}"
       organization_name: "vault"
@@ -58,11 +58,11 @@
 
 - name: Sign Vault TLS certificate with bootstrap CA
   community.crypto.openssl_certificate:
-    path: "{{ bootstrap_tls_dir }}/vault/{{ vault_host }}/{{vault_server_cert_file}}"
-    csr_path: "{{ bootstrap_tls_dir }}/vault/{{ vault_host }}/vault.csr"
+    path: "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/{{vault_server_cert_file}}"
+    csr_path: "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/vault.csr"
     provider: ownca
-    ownca_path: "{{ ca_cert_path_on_bastion }}"
-    ownca_privatekey_path: "{{ ca_key_path_on_bastion }}"
+    ownca_path: "{{ bastion_ca_cert_path }}"
+    ownca_privatekey_path: "{{ bastion_ca_key_path }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
 
 
@@ -74,7 +74,8 @@
   stat:
     path: "{{ item }}"
   loop:
-     - "{{ bootstrap_tls_dir }}/vault/{{ vault_host }}/{{vault_server_cert_file}}"
+     - "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/{{vault_server_cert_file}}"
+     - "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/{{vault_server_key_file}}"
   register: tls_files
   changed_when: false
   failed_when: not tls_files.stat.exists
