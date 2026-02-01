@@ -1,23 +1,9 @@
 # Bootstrap TLS phase configuration
 # Used ONLY by 03-bootstrap-tls-vault.yaml for temporary storage of TLS material before distributing to Vault and Consul nodes
 
-# TLS material 
-ca_cert_file: ca.pem
-ca_key_file: ca.key
-consul_client_cert_dir: consul-client-certs
-consul_client_cert_file: consul-client.pem
-consul_client_key_file: consul-client.key
-
-
-
-# BASTION PRIMARY HOST
 bootstrap_ca_ttl_days: 7
+
 bastion_tmp_tls_dir: /tmp/bootstrap-tls
-
-
-
-
-
 bastion_tmp_tls_dir_for_vault: "{{ bastion_tmp_tls_dir }}/vault"
 bastion_tmp_tls_dir_for_consul: "{{ bastion_tmp_tls_dir }}/consul
 bastion_tmp_tls_dir_for_consul_clients: "{{ bastion_tmp_tls_dir }}/consul-clients"
