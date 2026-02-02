@@ -16,10 +16,8 @@
 - name: Fail if bootstrap CA key already exists
   fail:
     msg: >
-      Bootstrap CA private key already exists.
-      Refusing to reuse an existing CA.
+      Bootstrap CA private key already exists. Refusing to reuse an existing CA.
   when: existing_ca_key.stat.exists
-
 
 - name: Ensure bootstrap TLS directory exists
   file:
@@ -42,7 +40,6 @@
     mode: "0600"
   register: bootstrap_ca_key
 
-
 ###############################################################################
 # CA certificate
 ###############################################################################
@@ -57,15 +54,14 @@
       common_name: "vault-consul-bootstrap-tls-ca"
       organization_name: "internal"
     basic_constraints:
-      - "CA:TRUE"
+    - "CA:TRUE"
     key_usage:
-      - keyCertSign
-      - cRLSign
+    - keyCertSign
+    - cRLSign
     owner: root
     group: root
     mode: "0644"
   register: bootstrap_ca_cert
-
 
 ###############################################################################
 # Sanity assertions
@@ -74,62 +70,22 @@
 - name: Assert bootstrap CA TTL is within allowed bounds
   assert:
     that:
-      - bootstrap_ca_ttl_days | int <= 14
+    - bootstrap_ca_ttl_days | int <= 14
     fail_msg: >
-      Bootstrap TLS CA TTL is too long.
-      This CA must be short-lived by design (<= 14 days).
-
+      Bootstrap TLS CA TTL is too long. This CA must be short-lived by design (<= 14 days).
 
 - name: Assert bootstrap CA files exist
-  stat:
-    path: "{{ item.path }}"
-    follow: false
-  loop: 
+  include_role:
+    name: assert_paths
+  vars:
+    requred_paths:
     - path: "{{ bastion_ca_key_path }}"
       type: file
       owner: root
       group: root
-      mode: "0600"  
+      mode: "0600"
     - path: "{{ bastion_ca_cert_path }}"
       type: file
       owner: root
       group: root
       mode: "0644"
-  register: path_stats
-  changed_when: false
-  failed_when: >
-    path_stats.results
-    | selectattr('stat.exists', 'equalto', false)
-    | list
-    | length > 0
-    or
-    path_stats.results
-    | selectattr('item.type', 'equalto', 'file')
-    | selectattr('stat.isreg', 'equalto', false)
-    | list
-    | length > 0
-    or
-    path_stats.results
-    | selectattr('item.type', 'equalto', 'directory')
-    | selectattr('stat.isdir', 'equalto', false)
-    | list
-    | length > 0
-    or
-    path_stats.results
-    | selectattr('item.owner', 'defined')
-    | selectattr('stat.pw_name', 'ne', attribute='item.owner')
-    | list
-    | length > 0
-    or
-    path_stats.results
-    | selectattr('item.group', 'defined')
-    | selectattr('stat.gr_name', 'ne', attribute='item.group')
-    | list
-    | length > 0
-    or
-    path_stats.results
-    | selectattr('item.mode', 'defined')
-    | selectattr('stat.mode', 'ne', attribute='item.mode')
-    | list
-    | length > 0
-

@@ -19,7 +19,6 @@
     group: vault
     mode: "0750"
 
-
 ###############################################################################
 # Distribute CA certificate from primary Bastion to Vault
 ###############################################################################
@@ -32,7 +31,6 @@
     mode: "0644"
     remote_src: yes # The source file lives on the delegated host, not the target
   delegate_to: "{{ bastion_primary_host }}"
-
 
 ###############################################################################
 # Distribute Vault server certificate & key  from primary Bastion to Vault
@@ -80,7 +78,6 @@
     remote_src: yes
   delegate_to: "{{ bastion_primary_host }}"
 
-
 - name: Copy Vault client private key
   copy:
     src: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ inventory_hostname }}/{{consul_client_key_file}}"
@@ -96,17 +93,32 @@
 ###############################################################################
 
 - name: Assert required TLS files exist
-  stat:
-    path: "{{ item }}"
-  loop:
-     - "{{ vault_ca_cert_path }}"
-     - "{{ vault_server_cert_path }}"
-     - "{{ vault_server_key_path }}"
-     - "{{ vault_client_auth_to_consul_cert_path }}"
-     - "{{ vault_client_auth_to_consul_key_path }}"
-  register: tls_files
-  changed_when: false
-  failed_when: not tls_files.stat.exists
-
-
-
+  include_role:
+    name: assert_paths
+  vars:
+    requred_paths:
+    - path: "{{ vault_ca_cert_path }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0644"
+    - path: "{{ vault_server_cert_path }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0644"
+    - path: "{{ vault_server_key_path }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0600"
+    - path: "{{ vault_client_auth_to_consul_cert_path }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0644"
+    - path: "{{ vault_client_auth_to_consul_key_path }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0600"

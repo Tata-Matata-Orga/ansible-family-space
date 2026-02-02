@@ -14,7 +14,6 @@
     group: root
     mode: "0700"
 
-
 ###############################################################################
 # Client private key
 ###############################################################################
@@ -27,7 +26,6 @@
     group: root
     mode: "0600"
 
-
 ###############################################################################
 # Build SAN list
 ###############################################################################
@@ -35,9 +33,8 @@
 - name: Build client certificate SANs
   set_fact:
     client_tls_sans:
-      - "DNS:{{ client_name }}"
+    - "DNS:{{ client_name }}"
   changed_when: false
-
 
 ###############################################################################
 # CSR
@@ -52,7 +49,6 @@
       organization_name: "consul-client"
     subject_alt_name: "{{ client_tls_sans }}"
 
-
 ###############################################################################
 # Sign client certificate
 ###############################################################################
@@ -66,17 +62,22 @@
     ownca_privatekey_path: "{{ bastion_ca_key_path }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
 
-
 ###############################################################################
 # Sanity checks
 ###############################################################################
 
 - name: Assert Consul client certificate and key were created
-  stat:
-    path: "{{ item }}"
-  loop:
-     - "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_cert_file }}"
-     - "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_key_file }}"
-  register: tls_files
-  changed_when: false
-  failed_when: not tls_files.stat.exists
+  include_role:
+    name: assert_paths
+  vars:
+    requred_paths:
+    - path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_cert_file }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0644"
+    - path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_key_file }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0600"

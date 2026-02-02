@@ -15,7 +15,6 @@
     group: root
     mode: "0700"
 
-
 - name: Copy CA certificate from primary Bastion to this Bastion
   copy:
     src: "{{ bastion_ca_cert_path }}"
@@ -25,7 +24,6 @@
     mode: "0644"
     remote_src: yes
   delegate_to: "{{ bastion_primary_host }}"
-
 
 # Bastion to Consul auth certs
 ###############################################################################
@@ -43,7 +41,6 @@
     group: root
     mode: "0700"
 
-
 - name: Copy Bastion client certificate from primary Bastion to this Bastion
   copy:
     src: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ inventory_hostname }}/{{ consul_client_cert_file }}"
@@ -53,7 +50,6 @@
     mode: "0644"
     remote_src: yes
   delegate_to: "{{ bastion_primary_host }}"
-
 
 - name: Copy Bastion client private key from primary Bastion to this Bastion
   copy:
@@ -94,7 +90,6 @@
     remote_src: yes
   delegate_to: "{{ bastion_primary_host }}"
 
-
 - name: Copy Bastion Vault client private key
   copy:
     src: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ inventory_hostname }}/{{ vault_client_key_file }}"
@@ -104,3 +99,52 @@
     mode: "0600"
     remote_src: yes
   delegate_to: "{{ bastion_primary_host }}"
+
+###############################################################################
+# Sanity checks
+###############################################################################
+- name: Assert required TLS files exist on Bastion
+  include_role:
+    name: assert_paths
+  vars:
+    requred_paths:
+    - path: "{{ bastion_tls_dir }}"
+      type: folder
+      owner: root
+      group: root
+      mode: "0700"
+    - path: "{{ bastion_ca_cert_path }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0644"
+    - path: "{{ bastion_client_auth_to_consul_certs_dir }}"
+      type: folder
+      owner: root
+      group: root
+      mode: "0700"
+    - path: "{{ bastion_client_auth_to_consul_cert_path }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0644"
+    - path: "{{ bastion_client_auth_to_consul_key_path }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0600"
+    - path: "{{ bastion_client_auth_to_vault_certs_dir }}"
+      type: folder
+      owner: root
+      group: root
+      mode: "0700"
+    - path: "{{ bastion_client_auth_to_vault_cert_path }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0644"
+    - path: "{{ bastion_client_auth_to_vault_key_path }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0600"

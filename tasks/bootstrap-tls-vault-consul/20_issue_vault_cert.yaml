@@ -13,7 +13,6 @@
     group: root
     mode: "0700"
 
-
 ###############################################################################
 # Vault private key
 ###############################################################################
@@ -33,10 +32,9 @@
 - name: Build Vault certificate SANs
   set_fact:
     vault_tls_sans:
-      - "DNS:{{ vault_host }}"
-      - "IP:{{ hostvars[vault_host].ansible_default_ipv4.address }}"
+    - "DNS:{{ vault_host }}"
+    - "IP:{{ hostvars[vault_host].ansible_default_ipv4.address }}"
   changed_when: false
-
 
 ###############################################################################
 # Certificate Signing Request (CSR)
@@ -51,7 +49,6 @@
       organization_name: "vault"
     subject_alt_name: "{{ vault_tls_sans }}"
 
-
 ###############################################################################
 # Sign Vault certificate with bootstrap CA
 ###############################################################################
@@ -65,17 +62,22 @@
     ownca_privatekey_path: "{{ bastion_ca_key_path }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
 
-
 ###############################################################################
 # Sanity checks
 ###############################################################################
 
 - name: Assert Vault TLS certificate was created
-  stat:
-    path: "{{ item }}"
-  loop:
-     - "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/{{vault_server_cert_file}}"
-     - "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/{{vault_server_key_file}}"
-  register: tls_files
-  changed_when: false
-  failed_when: not tls_files.stat.exists
+  include_role:
+    name: assert_paths
+  vars:
+    requred_paths:
+    - path: "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/{{vault_server_cert_file}}"
+      type: file
+      owner: root
+      group: root
+      mode: "0644"
+    - path: "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/{{vault_server_key_file}}"
+      type: file
+      owner: root
+      group: root
+      mode: "0600"

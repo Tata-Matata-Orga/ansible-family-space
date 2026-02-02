@@ -11,7 +11,6 @@
     group: root
     mode: "0700"
 
-
 ###############################################################################
 # Consul private key
 ###############################################################################
@@ -24,7 +23,6 @@
     group: root
     mode: "0600"
 
-
 ###############################################################################
 # Build SAN list for Consul certificate
 ###############################################################################
@@ -32,10 +30,9 @@
 - name: Build Consul certificate SANs
   set_fact:
     consul_tls_sans:
-      - "DNS:{{ consul_host }}"
-      - "IP:{{ hostvars[consul_host].ansible_default_ipv4.address }}"
+    - "DNS:{{ consul_host }}"
+    - "IP:{{ hostvars[consul_host].ansible_default_ipv4.address }}"
   changed_when: false
-
 
 ###############################################################################
 # Certificate Signing Request (CSR)
@@ -50,7 +47,6 @@
       organization_name: "consul"
     subject_alt_name: "{{ consul_tls_sans }}"
 
-
 ###############################################################################
 # Sign Consul certificate with bootstrap CA
 ###############################################################################
@@ -64,17 +60,22 @@
     ownca_privatekey_path: "{{ bastion_ca_key_path }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
 
-
 ###############################################################################
 # Sanity checks
 ###############################################################################
 
 - name: Assert Consul server certificate and key were created
-  stat:
-    path: "{{ item }}"
-  loop:
-     - "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}/{{ consul_server_cert_file }}"
-     - "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}/{{ consul_server_key_file }}"
-  register: tls_files
-  changed_when: false
-  failed_when: not tls_files.stat.exists
+  include_role:
+    name: assert_paths
+  vars:
+    requred_paths:
+    - path: "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}/{{ consul_server_cert_file }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0644"
+    - path: "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}/{{ consul_server_key_file }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0600"

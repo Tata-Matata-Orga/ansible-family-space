@@ -3,7 +3,6 @@
 # For Bastion to authenticate to Vault API via mTLS as client
 ###############################################################################
 
-
 - name: Ensure temp Bastion Vault client TLS directory exists on primary Bastion server
   file:
     path: "{{ bastion_tmp_tls_dir_for_vault_clients }}"
@@ -11,7 +10,6 @@
     owner: root
     group: root
     mode: "0700"
-
 
 ###############################################################################
 # Private key
@@ -25,7 +23,6 @@
     group: root
     mode: "0600"
 
-
 ###############################################################################
 # SANs
 ###############################################################################
@@ -33,9 +30,8 @@
 - name: Build Bastion Vault client SANs
   set_fact:
     bastion_vault_client_sans:
-      - "DNS:bastion"
+    - "DNS:bastion"
   changed_when: false
-
 
 ###############################################################################
 # CSR
@@ -50,7 +46,6 @@
       organization_name: "consul-client"
     subject_alt_name: "{{ client_tls_sans }}"
 
-
 ###############################################################################
 # Sign certificate
 ###############################################################################
@@ -64,17 +59,22 @@
     ownca_privatekey_path: "{{ bastion_ca_key_path }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
 
-
 ###############################################################################
 # Sanity checks
 ###############################################################################
 
 - name: Assert required TLS files exist
-  stat:
-    path: "{{ item }}"
-  loop:
-     - "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_cert_file }}"
-     - "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_key_file }}"
-  register: tls_files
-  changed_when: false
-  failed_when: not tls_files.stat.exists
+  include_role:
+    name: assert_paths
+  vars:
+    requred_paths:
+    - path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_cert_file }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0644"
+    - path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_key_file }}"
+      type: file
+      owner: root
+      group: root
+      mode: "0600"
