@@ -26,9 +26,11 @@ ui = true
 # Does not affect HTTP or DNS API
 bind_addr   = "{{ consul_internal_bind_addr }}"
 
-# HTTP API (8500) + DNS listeners (8600)
-# Used by Ansible, curl, Vault agent, humans, health checks
-client_addr = "{{ consul_client_addr }}"
+# controls which local interfaces Consul listens on for: HTTP API (8500 / 8501), DNS (8600)
+# server-side socket bind
+# could be ansible_default_ipv4.address, but then Consul listens only on that one IP, loopback may not work
+# 0.0.0.0 = listen on all IPv4 interfaces on this node
+client_addr = "0.0.0.0"
 
 # for setup with multiple nodes
 # the address other nodes should use to reach me

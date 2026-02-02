@@ -1,0 +1,39 @@
+---
+- name: Configure DNS entries (/etc/hosts)
+  hosts:
+  - bastion
+  - vault
+  - consul
+  become: true
+  gather_facts: false
+
+  tasks:
+  # /etc/hosts
+  - name: Ensure hostnames are present in /etc/hosts
+    blockinfile:
+      #blockinfile manages (adds, removes) a whole block of text inside a file, not just a single line; idempotent
+      path: /etc/hosts
+      marker: "# === {mark} Ansible MANAGED ==="
+      block: |
+        {% for svc in dns_entries.values() %}
+        {{ hostvars[svc.host].ansible_default_ipv4.address }} {{ svc.names | join(' ') }}
+        {% endfor %}
+
+  # Verify hostname resolution
+  - name: Verify hostname resolution for Vault
+    command: getent hosts vault.service.internal
+    changed_when: false
+
+  - name: Fail if DNS resolution is broken
+    fail:
+      msg: "Vault.service.internal hostname resolution failed on {{ inventory_hostname }}"
+    when: result.rc is defined and result.rc != 0
+
+  - name: Verify hostname resolution for Consul
+    command: getent hosts consul.service.internal
+    changed_when: false
+
+  - name: Fail if DNS resolution is broken
+    fail:
+      msg: "Consul.service.internal hostname resolution failed on {{ inventory_hostname }}"
+    when: result.rc is defined and result.rc != 0
