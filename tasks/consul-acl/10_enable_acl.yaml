@@ -1,9 +1,26 @@
-acl {
-  enabled = true
-  default_policy = "deny"
-  enable_token_persistence = true
-}
+# Purpose: Enable Consul ACL system (default deny)
+- hosts: consul
+  become: true
+  gather_facts: false
+  tasks:
+  - name: Create ACL configuration file from template on each Consul node
+    template:
+      src: acl.hcl.j2
+      dest: /etc/consul.d/acl.hcl
+      owner: consul
+      group: consul
+      mode: "0640"
 
-Do not create tokens yet
+  # first restart ONLY Consul servers
+  - name: Restart Consul servers
+    service:
+      name: consul
+      state: restarted
+    when: inventory_hostname in groups['consul_servers']
 
-Restart Consul servers only.
+  # then restart Consul clients
+  - name: Restart Consul clients
+    service:
+      name: consul
+      state: restarted
+    when: inventory_hostname in groups['consul_clients']

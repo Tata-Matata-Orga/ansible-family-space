@@ -1,0 +1,9 @@
+verify_https_name: "consul api" # human-readable
+verify_https_url: "" # full URL
+verify_https_client_cert: ""
+verify_https_client_key: ""
+verify_https_ca_cert: ""
+verify_https_method: GET
+verify_https_expected_status:
+- 200
+verify_https_timeout: 5
