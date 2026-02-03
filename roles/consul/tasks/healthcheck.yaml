@@ -22,7 +22,7 @@
   delay: 2
   changed_when: false
 
-- name: Wait for Consul leader election
+- name: Wait for Consul leader election (ONLY on Consul servers)
   uri:
     url: "{{ consul_agent_api_scheme }}://{{ ansible_default_ipv4.address }}:{{ consul_agent_api_port }}{{consul_api_leader_path}}"
     method: GET
@@ -45,3 +45,4 @@
   until:
   - consul_leader is succeeded
   - consul_leader.content | trim | length > 0
+  when: inventory_hostname in groups['consul_servers']

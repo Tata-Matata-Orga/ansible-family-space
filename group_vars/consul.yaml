@@ -1,13 +1,3 @@
-# This node is a server, not just a client
-# Client forwards requests, no data, no Raft
-# Server participates in Raft, stores data, can become leader
-consul_server: true
-
-# Do not form a Raft cluster until this many Consul servers are present.
-# applies only to Consul servers (consul_server = true)
-# initial Raft bootstrap setting
-bootstrap_expect: 1
-
 #The Consul datacenter name this agent belongs to
 # Raft consensus happens per datacenter
 # ACLs, intentions, and services are namespaced by datacenter

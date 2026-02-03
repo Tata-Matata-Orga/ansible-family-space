@@ -3,16 +3,16 @@ node_name  = "{{ inventory_hostname }}"
 
 data_dir = "{{ consul_data_dir }}"
 
-# true if this node is a server, not just a client
 # Client forwards requests, no data, no Raft
 # Server participates in Raft, stores data, can become leader
-server = "{{ consul_server }}"
-
+{% if inventory_hostname in groups['consul_servers'] %}
+server = true
 # minimal number of Consul servers that are required to form a cluster
 # applies only to Consul servers (consul_server = true)
-# initial Raft bootstrap setting
-bootstrap_expect = "{{ bootstrap_expect }}"
-
+bootstrap_expect = {{ groups['consul_servers'] | length }}
+{% else %}
+server = false
+{% endif %}
 
 log_level = "{{ consul_log_level }}"
 
