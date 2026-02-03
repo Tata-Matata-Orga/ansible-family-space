@@ -31,6 +31,7 @@
   set_fact:
     consul_tls_sans:
     - "DNS:{{ consul_host }}"
+    - "DNS:{{ consul_service_name }}"
     - "IP:{{ hostvars[consul_host].ansible_default_ipv4.address }}"
   changed_when: false
 

@@ -9,9 +9,18 @@
     method: GET
     status_code: 200
     # validate_certs is ignored when using HTTP, only becomes relevant for HTTPS
-    validate_certs: "{{ consul_agent_tls_enabled }}"
+    # if true Ansible will verify the server cert is signed by a trusted CA and hostname/IP matches the certificate SAN
+    validate_certs: "{{ consul_tls_enabled }}"
+    # Ansible need to know CA cert to validate server cert when using HTTPS
+    ca_path: "{{ consul_ca_cert_path if consul_tls_enabled else omit }}"
+
+    # since we are using mTLS, Consul checks client certs (verify_incoming = true)
+    # in this case, consul server keys are used as client keys for simplicity
+    client_cert: "{{ consul_server_cert_path if consul_tls_enabled else omit }}"
+    client_key: "{{ consul_server_key_path if consul_tls_enabled else omit }}"
   retries: 30
   delay: 2
+  changed_when: false
 
 - name: Wait for Consul leader election
   uri:
@@ -20,10 +29,19 @@
     return_content: true
     status_code: 200
     # validate_certs is ignored when using HTTP, only becomes relevant for HTTPS
-    validate_certs: "{{ consul_agent_tls_enabled }}"
+    validate_certs: "{{ consul_tls_enabled }}"
+
+    # Ansible need to know CA cert to validate server cert when using HTTPS
+    ca_path: "{{ consul_ca_cert_path if consul_tls_enabled else omit }}"
+
+    # since we are using mTLS, Consul checks client certs (verify_incoming = true)
+    # in this case, consul server keys are used as client keys for simplicity
+    client_cert: "{{ consul_server_cert_path if consul_tls_enabled else omit }}"
+    client_key: "{{ consul_server_key_path if consul_tls_enabled else omit }}"
   register: consul_leader
   retries: 30
   delay: 2
+  #HTTP 200 alone is not enough. API may be reachable before a leader exists
   until:
   - consul_leader is succeeded
   - consul_leader.content | trim | length > 0

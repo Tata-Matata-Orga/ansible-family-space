@@ -30,9 +30,9 @@
     enabled: yes
     state: started
 
-- name: Wait for Vault API to respond
+- name: Wait for Vault API to respond on HTTP
   uri:
-    url: "{{ vault_api_scheme | default('http') }}://127.0.0.1:{{ vault_api_port }}/v1/sys/health"
+    url: url: "{{ vault_api_scheme }}://{{ ansible_default_ipv4.address }}:{{ vault_api_port }}{{vault_api_health_path}}"
     method: GET
     status_code: [200, 429, 501]
   register: vault_health

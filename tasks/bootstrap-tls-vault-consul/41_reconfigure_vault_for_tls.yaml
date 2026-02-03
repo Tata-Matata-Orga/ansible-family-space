@@ -101,10 +101,15 @@
   # 429 (sealed) or 501 (uninitialized) are expected
   - name: Wait for Vault HTTPS health endpoint
     uri:
-      url: "https://127.0.0.1:{{ vault_api_port }}/{{ vault_api_health_path }}"
+      url: "https://{{ ansible_default_ipv4.address }}:{{ vault_api_port }}/{{ vault_api_health_path }}"
       method: GET
       status_code: [ 200, 429, 501 ]
+      # for Ansible to validate the Vault server certificate
       ca_path: "{{ vault_ca_cert_path }}"
+      # since we enabled mTLS, Vault will want to check client certs
+      # Vault server cert is also a valid client cert for mTLS here
+      client_cert: "{{ vault_server_cert_path }}"
+      client_key: "{{ vault_server_key_path }}"
       validate_certs: true
       return_content: false
     register: vault_https_health

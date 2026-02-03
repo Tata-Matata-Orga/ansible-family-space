@@ -5,13 +5,13 @@ dns_entries:
   vault:
     host: "{{ groups['vault'][0] }}"
     names:
-    - vault.service.internal
+    - "{{ vault_service_name }}"
 
   consul:
     # for Consul it doesn't matter which node we point to since they replicate data among themselves
     host: "{{ groups['consul'][0] }}"
     names:
-    - consul.service.internal
+    - "{{ consul_service_name }}"
 
 #ensure single canonical bastion host in case of future HA setups and accidental multiple assignments of bastion_primary
 bastion_primary_host: >-
@@ -36,13 +36,18 @@ vault_client_cert_file: vault-client.pem
 ######################################################
 ######### Consul  ####################################
 ######################################################
+consul_service_name: "consul.service.internal"
+
 # Address advertised by the Consul agent for client access
 # HTTP/HTTPS API
 # used by Vault, Bastion, kubectl plugins, etc.
-consul_api_addr: "{{ consul_agent_api_scheme }}://{{ consul.service.internal }}: {{ consul_agent_api_port }}"
+consul_api_addr: "{{ consul_agent_api_scheme }}://{{ consul_service_name }}: {{ consul_agent_api_port }}"
 
 # Port of the Consul agent API (8501 = HTTPS, 8500 = HTTP)
-consul_agent_api_port: "{{ 8501 if consul_tls_enabled else 8500 }}"
+consul_http_port: 8500
+consul_https_port: 8501
+consul_dns_port: 8600
+consul_agent_api_port: "{{ consul_https_port if consul_tls_enabled else consul_http_port }}"
 
 # HTTP or HTTPS depending on TLS phase
 consul_agent_api_scheme: "{{ 'https' if consul_tls_enabled else 'http' }}"
@@ -56,6 +61,7 @@ consul_api_leader_path: /v1/status/leader
 ######################################################
 ######### Vault  #####################################
 ######################################################
+vault_service_name: "vault.service.internal"
 
 vault_api_port: 8200
 vault_cluster_port: 8201
@@ -68,15 +74,12 @@ vault_tls_enabled: false
 # HTTP or HTTPS depending on TLS phase
 vault_api_scheme: "{{ 'https' if vault_tls_enabled else 'http' }}"
 
-vault_api_addr: "{{ vault_api_scheme }}://{{ ansible_default_ipv4.address }}:{{ vault_api_port }}"
+vault_api_addr: "{{ vault_api_scheme }}://{{ vault_service_name }}:{{ vault_api_port }}"
 vault_cluster_addr: "{{ vault_api_scheme }}://{{ ansible_default_ipv4.address }}:{{ vault_cluster_port}}"
 
 ######################################################
 ######### Consul-Vault  ##############################
 ######################################################
-
-consul_addr_that_vault_connects_to: "{{ consul_api_addr }}"
-consul_port_that_vault_connects_to: "{{ consul_agent_api_port }}"
 
 #key prefix inside Consul’s KV store where Vault data will be stored
 vault_prefix_in_consul_store: "vault/"

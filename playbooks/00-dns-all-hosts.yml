@@ -21,19 +21,19 @@
 
   # Verify hostname resolution
   - name: Verify hostname resolution for Vault
-    command: getent hosts vault.service.internal
+    command: getent hosts {{ vault_service_name }}
     changed_when: false
 
   - name: Fail if DNS resolution is broken
     fail:
-      msg: "Vault.service.internal hostname resolution failed on {{ inventory_hostname }}"
+      msg: "Vault service name resolution failed on {{ inventory_hostname }}"
     when: result.rc is defined and result.rc != 0
 
   - name: Verify hostname resolution for Consul
-    command: getent hosts consul.service.internal
+    command: getent hosts {{ consul_service_name }}
     changed_when: false
 
   - name: Fail if DNS resolution is broken
     fail:
-      msg: "Consul.service.internal hostname resolution failed on {{ inventory_hostname }}"
+      msg: "Consul service name resolution failed on {{ inventory_hostname }}"
     when: result.rc is defined and result.rc != 0

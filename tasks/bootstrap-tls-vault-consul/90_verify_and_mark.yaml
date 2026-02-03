@@ -5,10 +5,15 @@
   tasks:
   - name: Verify Vault HTTPS is active (final state)
     uri:
-      url: "https://127.0.0.1:{{ vault_api_port }}/{{ vault_api_health_path }}"
+      url: "https://{{ ansible_default_ipv4.address }}:{{ vault_api_port }}/{{ vault_api_health_path }}"
       method: GET
       status_code: [ 429, 501 ]
+      # for Ansible to validate the Vault server certificate
       ca_path: "{{ vault_ca_cert_path }}"
+      # since we enabled mTLS, Vault will want to check client certs
+      # Vault server cert is also a valid client cert for mTLS here
+      client_cert: "{{ vault_server_cert_path }}"
+      client_key: "{{ vault_server_key_path }}"
       validate_certs: true
       return_content: false
     changed_when: false
@@ -25,14 +30,18 @@
       group: root
       mode: "0600"
 
+- hosts: bastion
+  become: false
+  gather_facts: false
+  tasks:
   # verify mTLS from Bastion to Vault and Consul
   - name: Check Vault HTTPS from Bastion
     uri:
-      url: "https://{{ vault_api_addr | regex_replace('^https://', '') }}/v1/sys/health"
+      url: "{{ vault_api_addr }}{{ vault_api_health_path }}"
       method: GET
       status_code: [ 200, 429, 501 ]
-      # to verify Consul server certs signed by our CA
-      ca_path: "{{ bastion_ca_cert_path }} "
+      # for Ansible to verify Vault server certs signed by our CA
+      ca_path: "{{ bastion_ca_cert_path }}"
       # mTLS client certs for Bastion → Consul
       client_cert: "{{ bastion_client_auth_to_vault_cert_path }}"
       client_key: "{{ bastion_client_auth_to_vault_key_path }}"
@@ -45,7 +54,7 @@
       url: "{{ consul_api_addr }}{{ consul_api_leader_path}}"
       method: GET
       status_code: 200
-      # to verify Consul server certs signed by our CA
+      # for Ansible to verify Consul server certs signed by our CA
       ca_path: "{{ bastion_ca_cert_path }}"
       # mTLS client certs for Bastion → Consul
       client_cert: "{{ bastion_client_auth_to_consul_cert_path }}"

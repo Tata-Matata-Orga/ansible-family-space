@@ -10,7 +10,7 @@ ui = true
 # address is network endpoint (https(s)://host:port) where Vault reaches Consul.
 # path defines where inside Consul's KV store Vault data lives.
 storage "consul" {
-  address = "{{ consul_agent_api_scheme }}://{{ consul_addr_that_vault_connects_to }}:{{ consul_port_that_vault_connects_to }}"
+  address = "{{ consul_api_addr }}"
   path    = "{{ vault_prefix_in_consul_store }}"
 
   {% if vault_tls_enabled %}
@@ -25,7 +25,7 @@ storage "consul" {
 
 listener "tcp" {
   address     = "0.0.0.0:{{ vault_api_port }}"
-  {% if vault_api_scheme == 'https' %}
+  {% if vault_tls_enabled %}
   tls_disable = 0
   tls_cert_file = "{{ vault_server_cert_path }}"
   tls_key_file  = "{{ vault_server_key_path }}"
