@@ -1,9 +1,53 @@
-Using management token:
+# Using management token generated in 20_bootstrap_acl.yaml create tokens for:
 
-Vault token
+#- Vault 
+# Consul-server 
+# K8s 
 
-Consul-server token (if needed)
+# Attach policies explicitly.
 
-Later: K8s tokens
+- hosts: "{{ bastion_primary_host }}"
+  become: true
+  gather_facts: false
+  tasks:
+  - name: Create Consul ACL policies
+    consul_acl_policy:
+    name: "{{ item.name }}"
+    rules: "{{ lookup('file', item.file) }}"
+    state: present
+    token: "{{ consul_acl_bootstrap.stdout | from_json | json_query('SecretID') }}"
+    url: "{{ consul_api_addr }}"
+    ca_path: "{{ bastion_ca_cert_path }}"
+    client_cert: "{{ bastion_client_auth_to_consul_cert_path }}"
+    client_key: "{{ bastion_client_auth_to_consul_key_path }}"
+  loop:
+    - { name: "consul-servers", file: "30_policies/consul-servers.hcl" }
+    - { name: "vault",          file: "30_policies/vault.hcl" }
+    - { name: "k8s",            file: "30_policies/k8s.hcl" }
+  no_log: true
 
-Attach policies explicitly.
+  - name: Create Consul server agent token
+    consul_acl_token:
+    description: "Consul server agent token"
+    policies:
+      - name: consul-servers
+    token: "{{ consul_acl_bootstrap.stdout | from_json | json_query('SecretID') }}"
+    url: "{{ consul_api_addr }}"
+    ca_path: "{{ bastion_ca_cert_path }}"
+    client_cert: "{{ bastion_client_auth_to_consul_cert_path }}"
+    client_key: "{{ bastion_client_auth_to_consul_key_path }}"
+  register: consul_server_token
+  no_log: true
+
+  - name: Create Vault Consul token
+  consul_acl_token:
+    description: "Vault Consul backend token"
+    policies:
+      - name: vault
+    token: "{{ consul_acl_bootstrap.stdout | from_json | json_query('SecretID') }}"
+    url: "{{ consul_api_addr }}"
+    ca_path: "{{ bastion_ca_cert_path }}"
+    client_cert: "{{ bastion_client_auth_to_consul_cert_path }}"
+    client_key: "{{ bastion_client_auth_to_consul_key_path }}"
+  register: vault_consul_token
+  no_log: true

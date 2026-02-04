@@ -1,4 +1,4 @@
-- hosts: bastion
+- hosts: "{{ bastion_primary_host }}"
   become: false
   gather_facts: false
   tasks:

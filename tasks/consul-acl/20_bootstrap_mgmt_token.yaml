@@ -1,17 +1,29 @@
-This must be:
+# Runs on Bastion, targets Consul API over HTTPS + mTLS
+# This task is not idempotent, so it should fail if run more than once. If ACLs are already bootstrapped
+# Generate the management token, capture it once, never print it
+# Never re-run this step accidentally
 
-run_once: true
+# returns JSON that we do not print, do not log, do not write to disk
+# only accessible in consul_acl_bootstrap.stdout
+#{
+#  "AccessorID": "...",
+#  "SecretID": "s.xxxxx",
+#  "Description": "Bootstrap Token"
+#}
 
-delegated to one Consul server
-
-guarded by a marker file
-
-Output:
-
-Management token (highest privilege)
-
-Store it:
-
-Short-term: Ansible vault
-
-Medium-term: injected into Vault after Vault init
+# With the token we regain controlled access to the Consul API
+# we can create policies and tokens
+- hosts: "{{ bastion_primary_host }}"
+  become: true
+  gather_facts: false
+  tasks:
+  - name: Bootstrap Consul ACL system
+    command: >
+      consul acl bootstrap 
+      -http-addr={{ consul_api_addr }} 
+      -ca-file={{ bastion_ca_cert_path }} 
+      -client-cert={{ bastion_client_auth_to_consul_cert_path }} 
+      -client-key={{ bastion_client_auth_to_consul_key_path }}
+    register: consul_acl_bootstrap
+    no_log: true
+    changed_when: false
