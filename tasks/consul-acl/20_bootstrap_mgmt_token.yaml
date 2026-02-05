@@ -27,10 +27,18 @@
     register: consul_acl_bootstrap
     no_log: true
     changed_when: false
+  # we will store here temporarily the management token and consul-vault token in the next playbook, we will remove it at the end of the run
+  - name: Ensure Consul ACL token directory exists
+    file:
+      path: "{{ consul_tokens_tmp_dir }}"
+      state: directory
+      owner: root
+      group: root
+      mode: "0700"
   - name: Store Consul management token on bastion
     copy:
       content: "{{ consul_acl_bootstrap.stdout | from_json | json_query('SecretID') }}"
-      dest: /root/.consul-mgmt-token
+      dest: "{{ consul_tokens_tmp_dir }}/.consul-mgmt-token"
       owner: root
       group: root
       mode: "0600"

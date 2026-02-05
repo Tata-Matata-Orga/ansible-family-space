@@ -14,3 +14,8 @@ bastion_client_auth_to_vault_key_path: "{{ bastion_client_auth_to_vault_certs_di
 bastion_client_auth_to_consul_certs_dir: "{{ bastion_tls_dir }}/consul-client"
 bastion_client_auth_to_consul_cert_path: "{{ bastion_client_auth_to_consul_certs_dir }}/{{ consul_client_cert_file }}"
 bastion_client_auth_to_consul_key_path: "{{ bastion_client_auth_to_consul_certs_dir }}/{{ consul_client_key_file }}"
+
+# Temporary directory on Bastion hosts where Consul ACL tokens (s. 50-consul-acl playbook) 
+# will be temporarily stored during the run, 
+# with strict permissions, the folder will be removed at the end of the run
+consul_tokens_tmp_dir: /root/.consul-acl

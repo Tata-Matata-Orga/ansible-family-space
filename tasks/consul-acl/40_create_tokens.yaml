@@ -61,6 +61,17 @@
     # if false, Ansible may print token value in logs, policies
     no_log: true
 
+  # File with token will be deleted at the end of the run, we will distribute the token to Consul server agents in the next playbook, we will remove the file at the end of the run
+  - name: Persist Consul server agent token in tmp file
+    copy:
+      content: "{{ consul_server_token.secret }}"
+      dest: "{{ consul_tokens_tmp_dir }}/server-agent.token"
+      owner: root
+      group: root
+      mode: "0600"
+    no_log: true
+
+
   # creates Vault’s identity inside Consul, using the management token only as a temporary authority.
   - name: Create Vault Consul token
     # Ansilbe is calling Consul’s HTTP token API 
@@ -78,4 +89,14 @@
     # later distribute vault_consul_token.secret to Vault
     register: vault_consul_token
     # if false, Ansible may print token value in logs, policies
+    no_log: true
+
+  # File with token will be deleted at the end of the run, we will distribute the token to Vault in the next playbook, we will remove the file at the end of the run
+  - name: Persist Vault Consul backend token in tmp file
+    copy:
+      content: "{{ vault_consul_token.secret }}"
+      dest: "{{ consul_tokens_tmp_dir }}/vault-backend.token"
+      owner: root
+      group: root
+      mode: "0600"
     no_log: true
