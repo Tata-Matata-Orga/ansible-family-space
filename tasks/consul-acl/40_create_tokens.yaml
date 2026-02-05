@@ -65,7 +65,7 @@
   - name: Persist Consul server agent token in tmp file
     copy:
       content: "{{ consul_server_token.secret }}"
-      dest: "{{ consul_tokens_tmp_dir }}/server-agent.token"
+      dest: "{{ consul_tokens_tmp_dir }}/consul-server.token"
       owner: root
       group: root
       mode: "0600"
