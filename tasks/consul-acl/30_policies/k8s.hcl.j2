@@ -1,0 +1,25 @@
+# Kubernetes read-only service discovery policy
+# allows Kubernetes to observe the Consul catalog, not participate in it.
+
+service_prefix "" {
+  policy = "read"
+}
+
+node_prefix "" {
+  policy = "read"
+}
+
+
+
+## CURRENT setup
+# K8s does NOT talk to Consul, has no Consul token, Consul is an implementation detail of Vault.
+# So these policies are not used at all for the current setup.
+
+
+## FUTURE CASE 1
+# Consul clients on K8s nodes + Consul for service discovery
+# Possibly Consul Connect / mesh
+
+## FUTURE CASE 2
+# A controller mirrors Consul services into K8s (non-K8s services registered in Consul like legacy VMs, external databases)
+# Observability tooling correlates services ↔ nodes (any system that collects or correlates signals (metrics, logs, traces) across multiple domains.)

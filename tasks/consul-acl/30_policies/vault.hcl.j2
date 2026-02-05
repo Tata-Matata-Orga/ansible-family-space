@@ -1,72 +1,32 @@
 # What Vault is allowed to do inside Consul.
-# the most security-sensitive policy.
-
-Includes:
-
-kv/* (storage backend)
-
-session/*
-
-lock/*
-
-minimal agent read access
-
-Explicitly does not include:
-
-catalog write
-
-node write
-
-ACL write
-
-This enforces real least privilege.
-
-
-
-key_prefix "vault/" {
-  policy = "write"
-}
-
-session_prefix "" {
-  policy = "write"
-}
-
-service_prefix "" {
-  policy = "read"
-}
-
-node_prefix "" {
-  policy = "read"
-}
-
-
-
-
-# Vault Consul storage backend policy
 
 key_prefix "" {
   policy = "write"
 }
 
-session_prefix "" {
+session_prefix "{{ vault_prefix_in_consul_store }}" {
   policy = "write"
 }
 
-agent_prefix "" {
-  policy = "read"
-}
 
+# Required for later use (at the moment no need):
+# When we run a Consul agent on Vault and register Vault as a service
+# or have Vault query other services
+#service_prefix "" {
+#  policy = "read"
+#}
 
 ## Vault does not register services in the current design. It does not have Consul agent for now
 # So for Vault: no agent, no local registration, no catalog services
 # Therefore: Vault policy has no agent_prefix, has no service_prefix
 
+# KEY
 # At the moment, Vault talks only to catalog-independent APIs, such as:
 # /v1/kv/..., /v1/session/create, /v1/lock/...
 # These go directly to Consul servers, do not involve agent-local state, do not require agent_prefix or service_prefix
 
 
-### LEADER ELECTION and Consul as storage backend + SESSIONS
+### SESSIONS API for LEADER ELECTION when Consul as storage backend
 
 # Vault’s leader election (when using Consul as storage) is implemented on top of Consul sessions and locks.
 # Vault does not have its own independent leader-election mechanism in this mode.

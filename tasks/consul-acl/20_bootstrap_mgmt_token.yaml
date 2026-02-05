@@ -27,3 +27,10 @@
     register: consul_acl_bootstrap
     no_log: true
     changed_when: false
+  - name: Store Consul management token on bastion
+    copy:
+      content: "{{ consul_acl_bootstrap.stdout | from_json | json_query('SecretID') }}"
+      dest: /root/.consul-mgmt-token
+      owner: root
+      group: root
+      mode: "0600"

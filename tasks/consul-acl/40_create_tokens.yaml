@@ -10,44 +10,72 @@
   become: true
   gather_facts: false
   tasks:
+    # slurp reads the file, encodes its contents and metadata in base64, stores in variable
+    # we decode content to get the original token value
+  - name: Read Consul management token
+    slurp:
+      src: /root/.consul-mgmt-token
+    register: consul_mgmt_token_file
+  - name: Set Consul management token fact
+    set_fact:
+      consul_mgmt_token: "{{ consul_mgmt_token_file.content | b64decode | trim}}"
+
   - name: Create Consul ACL policies
+    # Ansible is calling Consul’s HTTP ACL API
     consul_acl_policy:
-    name: "{{ item.name }}"
-    rules: "{{ lookup('file', item.file) }}"
-    state: present
-    token: "{{ consul_acl_bootstrap.stdout | from_json | json_query('SecretID') }}"
-    url: "{{ consul_api_addr }}"
-    ca_path: "{{ bastion_ca_cert_path }}"
-    client_cert: "{{ bastion_client_auth_to_consul_cert_path }}"
-    client_key: "{{ bastion_client_auth_to_consul_key_path }}"
-  loop:
-    - { name: "consul-servers", file: "30_policies/consul-servers.hcl" }
-    - { name: "vault",          file: "30_policies/vault.hcl" }
-    - { name: "k8s",            file: "30_policies/k8s.hcl" }
-  no_log: true
+      # Create policy from template file with this name if it does not exist, idempotent
+      name: "{{ item.name }}"
+      # produces plain HCL text that is passed to Consul API as string
+      rules: "{{ lookup('template', item.file) }}"
+      state: present
+      token: "{{ consul_mgmt_token }}"
+      url: "{{ consul_api_addr }}"
+      # for Ansible to trust Consul server certificates signed by this CA
+      ca_path: "{{ bastion_ca_cert_path }}"
+      # mTLS client auth to Consul
+      client_cert: "{{ bastion_client_auth_to_consul_cert_path }}"
+      client_key: "{{ bastion_client_auth_to_consul_key_path }}"
+    loop:
+      - { name: "consul-servers", file: "30_policies/consul-servers.hcl.j2" }
+      - { name: "vault",          file: "30_policies/vault.hcl.j2" }
+      - { name: "k8s",            file: "30_policies/k8s.hcl.j2" }
+    no_log: true
 
+  # creates the identity that Consul servers will run as, using the management token only as a temporary authority.
   - name: Create Consul server agent token
+    # Ansilbe is calling Consul’s HTTP token API 
     consul_acl_token:
-    description: "Consul server agent token"
-    policies:
-      - name: consul-servers
-    token: "{{ consul_acl_bootstrap.stdout | from_json | json_query('SecretID') }}"
-    url: "{{ consul_api_addr }}"
-    ca_path: "{{ bastion_ca_cert_path }}"
-    client_cert: "{{ bastion_client_auth_to_consul_cert_path }}"
-    client_key: "{{ bastion_client_auth_to_consul_key_path }}"
-  register: consul_server_token
-  no_log: true
+      description: "Consul server agent token"
+      policies:
+        - name: consul-servers
+      token: "{{ consul_mgmt_token }}"
+      url: "{{ consul_api_addr }}"
+      # for Ansible to trust Consul server certificates signed by this CA
+      ca_path: "{{ bastion_ca_cert_path }}"
+      # mTLS client auth to Consul
+      client_cert: "{{ bastion_client_auth_to_consul_cert_path }}"
+      client_key: "{{ bastion_client_auth_to_consul_key_path }}"
+    
+    # later distribute consul_server_token.secret to Consul server agents
+    register: consul_server_token
+    # if false, Ansible may print token value in logs, policies
+    no_log: true
 
+  # creates Vault’s identity inside Consul, using the management token only as a temporary authority.
   - name: Create Vault Consul token
-  consul_acl_token:
-    description: "Vault Consul backend token"
-    policies:
-      - name: vault
-    token: "{{ consul_acl_bootstrap.stdout | from_json | json_query('SecretID') }}"
-    url: "{{ consul_api_addr }}"
-    ca_path: "{{ bastion_ca_cert_path }}"
-    client_cert: "{{ bastion_client_auth_to_consul_cert_path }}"
-    client_key: "{{ bastion_client_auth_to_consul_key_path }}"
-  register: vault_consul_token
-  no_log: true
+    # Ansilbe is calling Consul’s HTTP token API 
+    consul_acl_token:
+      description: "Vault Consul backend token"
+      policies:
+        - name: vault
+      token: "{{ consul_mgmt_token }}"
+      url: "{{ consul_api_addr }}"
+      # for Ansible to trust Consul server certificates signed by this CA
+      ca_path: "{{ bastion_ca_cert_path }}"
+      # mTLS client auth to Consul
+      client_cert: "{{ bastion_client_auth_to_consul_cert_path }}"
+      client_key: "{{ bastion_client_auth_to_consul_key_path }}"
+    # later distribute vault_consul_token.secret to Vault
+    register: vault_consul_token
+    # if false, Ansible may print token value in logs, policies
+    no_log: true
