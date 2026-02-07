@@ -39,7 +39,7 @@
   tasks:
   - name: Install Consul agent token
     copy:
-      dest: /etc/consul.d/token.hcl
+      dest: "{{ consul_server_agent_token_path }}"
       owner: consul
       group: consul
       mode: "0600"
@@ -68,7 +68,7 @@
   tasks:
   - name: Install Vault Consul storage config
     copy:
-      dest: /etc/vault.d/consul.hcl
+      dest: "{{ vault_consul_agent_token_path }}"
       owner: vault
       group: vault
       mode: "0600"

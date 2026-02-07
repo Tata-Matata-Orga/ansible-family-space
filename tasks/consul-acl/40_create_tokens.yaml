@@ -1,6 +1,6 @@
 # Using management token generated in 20_bootstrap_acl.yaml create tokens for:
 
-#- Vault 
+# Vault 
 # Consul-server 
 # K8s 
 
@@ -20,8 +20,9 @@
     set_fact:
       consul_mgmt_token: "{{ consul_mgmt_token_file.content | b64decode | trim}}"
 
-  - name: Create Consul ACL policies
-    # Ansible is calling Consul’s HTTP ACL API
+  - name: Create Consul ACL policies, call Consul API to store them 
+    # Ansible is calling Consul’s HTTP ACL API, the task encapsulates policy creation and invoking Consul to store it
+    # Policies are never distributed to servers, only tokens that reference policies
     consul_acl_policy:
       # Create policy from template file with this name if it does not exist, idempotent
       name: "{{ item.name }}"
@@ -43,9 +44,10 @@
 
   # creates the identity that Consul servers will run as, using the management token only as a temporary authority.
   - name: Create Consul server agent token
-    # Ansilbe is calling Consul’s HTTP token API 
+    # Ansible is calling Consul’s HTTP token API 
     consul_acl_token:
       description: "Consul server agent token"
+      # token references policy defined in the previous step
       policies:
         - name: consul-servers
       token: "{{ consul_mgmt_token }}"
@@ -74,7 +76,7 @@
 
   # creates Vault’s identity inside Consul, using the management token only as a temporary authority.
   - name: Create Vault Consul token
-    # Ansilbe is calling Consul’s HTTP token API 
+    # Ansible is calling Consul’s HTTP token API 
     consul_acl_token:
       description: "Vault Consul backend token"
       policies:

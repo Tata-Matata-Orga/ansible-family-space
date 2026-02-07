@@ -38,3 +38,6 @@ consul_ca_cert_path: "{{ consul_tls_dir }}/{{ ca_cert_file }}"
 
 # Logging
 consul_log_level: INFO
+
+# ACLs (for consul-acl playbook)
+consul_server_agent_token_path: "/etc/consul.d/token.hcl"
