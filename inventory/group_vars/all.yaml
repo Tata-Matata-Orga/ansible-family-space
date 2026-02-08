@@ -9,7 +9,7 @@ dns_entries:
 
   consul:
     # for Consul it doesn't matter which node we point to since they replicate data among themselves
-    host: "{{ groups['consul'][0] }}"
+    host: "{{ groups['consul_servers'][0] }}"
     names:
     - "{{ consul_service_name }}"
 
