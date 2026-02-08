@@ -26,17 +26,31 @@
         owner: ansible
         group: ansible
         mode: "0700"
-      
-    - name: Scan and add host SSH keys to known_hosts
-      known_hosts:
+    - name: Ensure ansible known_hosts file exists
+      file:
         path: /home/ansible/.ssh/known_hosts
-        name: "{{ hostvars[item].ansible_host }}"
-        # lookup('pipe', 'command') runs the command and returns its output; 
-        # ssh-keyscan is used to get the SSH host key of the target host without needing to connect via SSH; 
-        # -H option hashes the hostname in the output to adhere to HashKnownHosts yes;
-        # ~ means “concatenate strings”
-        key: "{{ lookup('pipe', 'ssh-keyscan -H ' ~ hostvars[item].ansible_host) }}"
+        state: touch
         owner: ansible
         group: ansible
         mode: "0644"
+    - name: Scan SSH host keys
+      command: >
+        ssh-keyscan -T 5 -t ed25519,rsa -H {{ hostvars[item].ansible_host }}
+      # register stores the list of all scanned keys in keyscan variable; 
+      # we will loop over this list in the next task to add each key to known_hosts; 
+      register: keyscan
+      changed_when: false
+      failed_when: false
       loop: "{{ groups['consul'] + groups['vault'] }}"
+    - name: Add SSH host keys to known_hosts
+      known_hosts:
+        path: /home/ansible/.ssh/known_hosts
+        name: "{{ hostvars[item.item].ansible_host }}"
+        key: "{{ item.stdout }}"
+      # loops over objects like this:
+      # keyscan:
+      #   results:
+      #      - item: consul-1
+      #        stdout: "|1|abc... ssh-ed25519 AAAA..."
+      #        rc: 0
+      loop: "{{ keyscan.results }}"
