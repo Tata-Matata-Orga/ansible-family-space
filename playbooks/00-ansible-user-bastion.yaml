@@ -1,0 +1,42 @@
+- name: Bootstrap ansible control user
+  hosts: bastion
+  gather_facts: false
+  become: false
+  vars:
+    ansible_user: root
+
+  tasks:
+    - name: Create ansible user
+      user:
+        name: ansible
+        shell: /bin/bash
+        create_home: true
+
+    - name: Allow ansible passwordless sudo
+      copy:
+        dest: /etc/sudoers.d/ansible
+        content: |
+          ansible ALL=(ALL) NOPASSWD:ALL
+        # the content is written into tmp file (%s) that is then validated by visudo, before this content is written into the final sudoers file; this is
+        # a safety mechanism to prevent breaking sudo access due to syntax errors in the sudoers file
+        validate: '/usr/sbin/visudo -cf %s'
+        owner: root
+        group: root
+        mode: "0440"
+
+    - name: Ensure ansible .ssh directory exists
+      file:
+        path: /home/ansible/.ssh
+        state: directory
+        owner: ansible
+        group: ansible
+        mode: "0700"
+
+    - name: Copy Terraform bootstrap SSH key to ansible
+      copy:
+        # injected via Terraform 
+        src: /root/.ssh/ansible_ed25519
+        dest: /home/ansible/.ssh/id_ed25519
+        owner: ansible
+        group: ansible
+        mode: "0600"

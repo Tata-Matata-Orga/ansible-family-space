@@ -1,0 +1,19 @@
+- name: Add SSH host keys to bastion known_hosts
+- hosts: bastion
+  become: true
+  gather_facts: false
+  tasks:
+  - name: Populate SSH known_hosts for private nodes
+  gather_facts: false
+  tasks:
+    - name: Enable hashed SSH known_hosts
+      lineinfile:
+        path: /etc/ssh/ssh_config
+        line: "HashKnownHosts yes"
+        state: present
+    - name: Scan and add host SSH keys
+      known_hosts:
+        path: /root/.ssh/known_hosts
+        name: "{{ hostvars[item].ansible_host }}"
+        key: "{{ lookup('pipe', 'ssh-keyscan -H ' ~ hostvars[item].ansible_host) }}"
+      loop: "{{ groups['consul'] + groups['vault'] }}"
