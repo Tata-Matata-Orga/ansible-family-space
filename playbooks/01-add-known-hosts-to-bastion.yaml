@@ -2,6 +2,12 @@
   hosts: bastion
   gather_facts: false
   tasks:
+    - name: Wait for SSH to be available
+      wait_for:
+        host: "{{ hostvars[item].ansible_host }}"
+        port: 22
+        timeout: 60
+      loop: "{{ groups['consul'] + groups['vault'] }}"
     # hashing known_hosts prevents leaking sensitive information about the infrastructure 
     # in case the known_hosts file is exposed; 
     # it also prevents potential issues with duplicate hostnames/IPs in the known_hosts file 
