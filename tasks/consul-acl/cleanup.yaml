@@ -1,1 +1,10 @@
-rm -rf /root/.consul-acl
+- name: Cleanup Consul ACL bootstrap material on Bastion
+  hosts: "{{ bastion_primary_host }}"
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Remove Consul ACL bootstrap directory
+      file:
+        path: /root/.consul-acl
+        state: absent
