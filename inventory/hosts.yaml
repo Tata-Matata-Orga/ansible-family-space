@@ -1,8 +1,15 @@
-consul:
+consul_servers:
   hosts:
     consul-1:
       ansible_host: 10.50.1.10
 
+consul_clients:
+  hosts: {}
+
+consul:
+  children:
+    consul_servers:
+    consul_clients:
 
 vault:
   hosts:

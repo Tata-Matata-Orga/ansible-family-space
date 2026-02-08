@@ -1,7 +1,8 @@
 ansible_user: ansible
-become: false
-# DNS
+# become: false is default Ansible behaviour
 
+
+# DNS
 dns_entries:
   # later for HA should be changed to load balancer in front of Vault nodes
   vault:
