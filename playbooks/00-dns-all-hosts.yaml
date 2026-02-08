@@ -16,7 +16,8 @@
       marker: "# === {mark} Ansible MANAGED ==="
       block: |
         {% for svc in dns_entries.values() %}
-        {{ hostvars[svc.host].ansible_default_ipv4.address }} {{ svc.names | join(' ') }}
+        # hostvars[svc.host].ansible_host should be availabe even before gathering facts since it's inventory data, not fact data
+        {{ hostvars[svc.host].ansible_host }} {{ svc.names | join(' ') }}
         {% endfor %}
 
   # Verify hostname resolution
