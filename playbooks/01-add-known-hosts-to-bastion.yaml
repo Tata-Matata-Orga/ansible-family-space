@@ -1,19 +1,36 @@
 - name: Add SSH host keys to bastion known_hosts
-- hosts: bastion
-  become: true
+  hosts: bastion
   gather_facts: false
   tasks:
-  - name: Populate SSH known_hosts for private nodes
-  gather_facts: false
-  tasks:
+    # hashing known_hosts prevents leaking sensitive information about the infrastructure 
+    # in case the known_hosts file is exposed; 
+    # it also prevents potential issues with duplicate hostnames/IPs in the known_hosts file 
+    # when nodes are recreated with the same names/IPs
+    # the setting means: All SSH clients on this system must hash hostnames when they add entries to the known_hosts file;
     - name: Enable hashed SSH known_hosts
+      become: true
       lineinfile:
         path: /etc/ssh/ssh_config
         line: "HashKnownHosts yes"
         state: present
-    - name: Scan and add host SSH keys
+    - name: Ensure ansible .ssh directory exists
+      file:
+        path: /home/ansible/.ssh
+        state: directory
+        owner: ansible
+        group: ansible
+        mode: "0700"
+      
+    - name: Scan and add host SSH keys to known_hosts
       known_hosts:
-        path: /root/.ssh/known_hosts
+        path: /home/ansible/.ssh/known_hosts
         name: "{{ hostvars[item].ansible_host }}"
+        # lookup('pipe', 'command') runs the command and returns its output; 
+        # ssh-keyscan is used to get the SSH host key of the target host without needing to connect via SSH; 
+        # -H option hashes the hostname in the output to adhere to HashKnownHosts yes;
+        # ~ means “concatenate strings”
         key: "{{ lookup('pipe', 'ssh-keyscan -H ' ~ hostvars[item].ansible_host) }}"
+        owner: ansible
+        group: ansible
+        mode: "0644"
       loop: "{{ groups['consul'] + groups['vault'] }}"

@@ -1,7 +1,6 @@
 - name: Bootstrap ansible control user
   hosts: bastion
   gather_facts: false
-  become: false
   vars:
     ansible_user: root
 
