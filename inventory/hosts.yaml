@@ -1,15 +1,7 @@
-consul_servers:
+consul:
   hosts:
     consul-1:
-      ansible_host: 10.0.0.10
-
-consul_clients:
-  hosts: {}
-
-consul:
-  children:
-    consul_servers:
-    consul_clients:
+      ansible_host: 10.50.1.10
 
 
 vault:
@@ -22,12 +14,12 @@ bastion:
     bastion-1:
       ansible_connection: local
       bastion_private_ip: 10.50.1.5
-      bastion_primary: true # for future HA setups in case we need to run some tasks on only one bastion
 
 k8s_controlplane:
   hosts:
     k8s_controlplane-1:
       ansible_host: 10.50.1.30
+
 
 k8s_worker:
   hosts:
