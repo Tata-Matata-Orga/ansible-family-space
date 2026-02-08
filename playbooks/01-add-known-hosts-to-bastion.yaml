@@ -43,6 +43,7 @@
       failed_when: false
       loop: "{{ groups['consul'] + groups['vault'] }}"
     - name: Add SSH host keys to known_hosts
+      no_log: true
       known_hosts:
         path: /home/ansible/.ssh/known_hosts
         name: "{{ hostvars[item.item].ansible_host }}"
