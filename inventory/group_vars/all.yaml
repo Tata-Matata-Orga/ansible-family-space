@@ -1,3 +1,4 @@
+# For THIS host/group, SSH as ansible user by default;
 ansible_user: ansible
 # become: false is default Ansible behaviour
 
