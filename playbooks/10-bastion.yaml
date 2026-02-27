@@ -21,7 +21,7 @@
     # IPv4 forwarding
     # -----------------------------
     - name: Enable IPv4 forwarding at runtime and persistently
-      sysctl:
+      ansible.posix.sysctl:
         name: net.ipv4.ip_forward
         value: "1"
         state: present
