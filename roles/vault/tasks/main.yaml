@@ -48,7 +48,7 @@
         - "{{ vault_tmp_zip }}"
         - "{{ vault_tmp_dir }}"
   vars:
-    vault_tmp_zip: /tmp/vault.zip
+    vault_tmp_zip: "{{vault_tmp_dir}}/vault.zip"
     vault_tmp_dir: /tmp/vault
 
 

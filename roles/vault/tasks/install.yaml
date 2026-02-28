@@ -27,6 +27,7 @@
   loop:
     - "{{ vault_data_dir }}"
     - "{{ vault_config_dir }}"
+    - "{{ vault_tmp_dir }}"
 
 - name: Check installed Vault version
   command: "{{ vault_binary_path }} version"
