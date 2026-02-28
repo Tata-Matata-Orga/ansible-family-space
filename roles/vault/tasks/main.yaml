@@ -32,10 +32,10 @@
 # Vault installation and configuration
 
 - block:
-    - import_tasks: install.yml
-    - import_tasks: configure.yml
-    - import_tasks: service.yml
-    - import_tasks: restart.yml
+    - import_tasks: install.yaml
+    - import_tasks: configure.yaml
+    - import_tasks: service.yaml
+    - import_tasks: restart.yaml
   rescue:
     - name: Vault install failed — show logs
       command: journalctl -u vault
