@@ -28,6 +28,7 @@ consul_config_dir: /etc/consul.d
 consul_install_dir: /usr/local/bin
 consul_binary_path: "{{consul_install_dir}}/consul"
 
+
 # TLS configuration
 consul_tls_dir: /etc/consul.d/tls
 consul_server_cert_file: consul.pem

@@ -1,5 +1,5 @@
 # Bootstrap TLS phase configuration
-# Used ONLY by 03-bootstrap-tls-vault.yaml for temporary storage of TLS material before distributing to Vault and Consul nodes
+# Used ONLY by 40-bootstrap-tls-vault-consul.yaml for temporary storage of TLS material before distributing to Vault and Consul nodes
 
 bootstrap_ca_ttl_days: 7
 

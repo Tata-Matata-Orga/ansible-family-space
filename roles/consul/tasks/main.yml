@@ -1,10 +1,24 @@
+- block:
+    - import_tasks: firewall.yaml
+    - import_tasks: install.yaml
+    - import_tasks: configure.yaml
+    - import_tasks: service.yaml
+    - import_tasks: healthcheck.yaml
+  rescue:
+    - name: Consul install failed — show logs
+      command: journalctl -u consul
+  always:
+    - name: Cleanup temp files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ consul_tmp_zip }}"
+        - "{{ consul_tmp_dir }}"
+  vars:
+    consul_tmp_zip: "{{ consul_tmp_dir }}/consul.zip"
+    consul_tmp_dir: /tmp/consul
 
-- import_tasks: firewall.yaml
-
-- import_tasks: install.yaml
-- import_tasks: configure.yaml
-- import_tasks: service.yaml
-- import_tasks: healthcheck.yaml
 
 
 

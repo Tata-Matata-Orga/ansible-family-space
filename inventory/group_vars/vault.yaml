@@ -17,6 +17,7 @@ vault_server_key_file: vault-server.key
 vault_server_cert_path: "{{ vault_tls_dir }}/{{vault_server_cert_file}}"
 vault_server_key_path: "{{ vault_tls_dir }}/{{vault_server_key_file}}"
 vault_ca_cert_path: "{{ vault_tls_dir }}/{{ca_cert_file}}"
+vault_tmp_zip: /tmp/vault.zip
 
 # Vault as client to Consul (mTLS)
 vault_client_auth_to_consul_certs_dir: "{{ vault_tls_dir }}/consul-client-auth"

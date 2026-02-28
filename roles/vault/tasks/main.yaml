@@ -27,7 +27,7 @@
     jump: ACCEPT
     comment: "Bastion -> Vault HTTP API"
   # Jinja filter: If this value is undefined, use an empty list instead
-  loop: "{{ groups['bastion'] | default([]) }}"
+  loop: "{{ groups['bastion']}}"
 
 # Vault installation and configuration
 
