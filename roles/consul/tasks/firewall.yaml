@@ -7,10 +7,10 @@
     chain: INPUT
     protocol: tcp
     destination_port: "{{ consul_agent_api_port }}"
-    source: "{{ hostvars[item].ansible_default_ipv4.address }}"
+    source: "{{ hostvars[item].ansible_host }}"
     jump: ACCEPT
     comment: "Vault -> Consul HTTP API"
-  loop: "{{ groups['vault'] | default([]) }}"
+  loop: "{{ groups['vault']}}"
 
 # Bastion → Consul API
 - name: Allow Bastion nodes to access Consul HTTP API
@@ -18,10 +18,10 @@
     chain: INPUT
     protocol: tcp
     destination_port: "{{ consul_agent_api_port }}"
-    source: "{{ hostvars[item].bastion_private_ip }}"
+    source: "{{ hostvars[item].ansible_host }}"
     jump: ACCEPT
     comment: "Bastion -> Consul HTTP API"
-  loop: "{{ groups['bastion'] | default([]) }}"
+  loop: "{{ groups['bastion'] }}"
 
 # Allow established connections
 # Otherwise responses to HTTP requests from Vault and Bastion will be dropped
