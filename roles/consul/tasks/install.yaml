@@ -28,6 +28,7 @@
   loop:
     - "{{ consul_data_dir }}"
     - "{{ consul_config_dir }}"
+    - "{{ consul_tmp_dir }}"
 
 - name: Download Consul
   get_url:
