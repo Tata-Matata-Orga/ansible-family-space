@@ -18,7 +18,7 @@
     chain: INPUT
     protocol: tcp
     destination_port: "{{ consul_agent_api_port }}"
-    source: "{{ hostvars[item].ansible_host }}"
+    source: "{{ hostvars[item].bastion_private_ip }}"
     jump: ACCEPT
     comment: "Bastion -> Consul HTTP API"
   loop: "{{ groups['bastion'] }}"
