@@ -10,13 +10,15 @@ dns_entries:
     host: "{{ groups['vault'][0] }}"
     names:
     - "{{ vault_service_name }}"
+    - "{{ groups['vault'][0] }}"
 
   consul:
     # for Consul it doesn't matter which node we point to since they replicate data among themselves
     host: "{{ groups['consul_servers'][0] }}"
     names:
     - "{{ consul_service_name }}"
-
+    - "{{ groups['consul_servers'][0] }}"
+    
 #ensure single canonical bastion host in case of future HA setups and accidental multiple assignments of bastion_primary
 bastion_primary_host: >-
   {{
