@@ -5,7 +5,7 @@ bootstrap_ca_ttl_days: 7
 
 bastion_tmp_tls_dir: /tmp/bootstrap-tls
 bastion_tmp_tls_dir_for_vault: "{{ bastion_tmp_tls_dir }}/vault"
-bastion_tmp_tls_dir_for_consul: "{{ bastion_tmp_tls_dir }}/consul
+bastion_tmp_tls_dir_for_consul: "{{ bastion_tmp_tls_dir }}/consul"
 bastion_tmp_tls_dir_for_consul_clients: "{{ bastion_tmp_tls_dir }}/consul-clients"
 
 #Vault clients are Bastion servers authenticating to Vault
