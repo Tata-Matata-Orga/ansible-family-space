@@ -31,8 +31,6 @@ consul_binary_path: "{{consul_install_dir}}/consul"
 
 # TLS configuration
 consul_tls_dir: /etc/consul.d/tls
-consul_server_cert_file: consul.pem
-consul_server_key_file: consul.key
 consul_server_cert_path: "{{ consul_tls_dir }}/{{ consul_server_cert_file }}"
 consul_server_key_path: "{{ consul_tls_dir }}/{{ consul_server_key_file }}"
 consul_ca_cert_path: "{{ consul_tls_dir }}/{{ ca_cert_file }}"

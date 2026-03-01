@@ -27,9 +27,13 @@ ca_key_file: ca.key
 
 consul_client_key_file: consul-client.key
 consul_client_cert_file: consul-client.pem
+consul_server_key_file: consul.key
+consul_server_cert_file: consul.pem
 
 vault_client_key_file: vault-client.key
 vault_client_cert_file: vault-client.pem
+vault_server_key_file: vault-server.key
+vault_server_cert_file: vault-server.pem
 
 ######################################################
 ######### Consul  ####################################
