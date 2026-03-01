@@ -6,37 +6,37 @@
   register: path_stats
   changed_when: false
   failed_when: >
-    path_stats.results
-    | selectattr('stat.exists', 'equalto', false)
-    | list
-    | length > 0
+    (path_stats.results
+      | selectattr('stat.exists', 'equalto', false)
+      | list
+      | length > 0)
     or
-    path_stats.results
-    | selectattr('item.type', 'equalto', 'file')
-    | selectattr('stat.isreg', 'equalto', false)
-    | list
-    | length > 0
+    (path_stats.results
+      | selectattr('item.type', 'equalto', 'file')
+      | selectattr('stat.isreg', 'equalto', false)
+      | list
+      | length > 0)
     or
-    path_stats.results
-    | selectattr('item.type', 'equalto', 'directory')
-    | selectattr('stat.isdir', 'equalto', false)
-    | list
-    | length > 0
+    (path_stats.results
+      | selectattr('item.type', 'equalto', 'directory')
+      | selectattr('stat.isdir', 'equalto', false)
+      | list
+      | length > 0)
     or
-    path_stats.results
-    | selectattr('item.owner', 'defined')
-    | selectattr('stat.pw_name', 'ne', attribute='item.owner')
-    | list
-    | length > 0
+    (path_stats.results
+      | selectattr('item.owner', 'defined')
+      | rejectattr('stat.pw_name', 'equalto', item.owner)
+      | list
+      | length > 0)
     or
-    path_stats.results
-    | selectattr('item.group', 'defined')
-    | selectattr('stat.gr_name', 'ne', attribute='item.group')
-    | list
-    | length > 0
+    (path_stats.results
+      | selectattr('item.group', 'defined')
+      | rejectattr('stat.gr_name', 'equalto', item.group)
+      | list
+      | length > 0)
     or
-    path_stats.results
-    | selectattr('item.mode', 'defined')
-    | selectattr('stat.mode', 'ne', attribute='item.mode')
-    | list
-    | length > 0
+    (path_stats.results
+      | selectattr('item.mode', 'defined')
+      | rejectattr('stat.mode', 'equalto', item.mode)
+      | list
+      | length > 0)
