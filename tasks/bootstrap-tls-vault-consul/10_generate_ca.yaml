@@ -45,17 +45,18 @@
 ###############################################################################
 
 - name: Generate bootstrap TLS CA CSR
-  community.crypto.x509_csr:
+  community.crypto.openssl_csr:
     path: "{{ bastion_tls_dir }}/ca.csr"
     privatekey_path: "{{ bastion_ca_key_path }}"
-    subject:
-      common_name: "vault-consul-bootstrap-tls-ca"
-      organization_name: "internal"
+    common_name: "vault-consul-bootstrap-tls-ca"
+    # optional: add SAN if you want; for a CA it's usually not needed
     basic_constraints:
       - "CA:TRUE"
+    basic_constraints_critical: true
     key_usage:
       - keyCertSign
       - cRLSign
+    key_usage_critical: true
     owner: root
     group: root
     mode: "0600"
