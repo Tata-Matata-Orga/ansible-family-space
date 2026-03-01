@@ -21,7 +21,7 @@
 - name: Generate client TLS private key for Consul client
   community.crypto.openssl_privatekey:
     path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_key_file }}"
-    type: ed25519
+    type: Ed25519
     owner: root
     group: root
     mode: "0600"
