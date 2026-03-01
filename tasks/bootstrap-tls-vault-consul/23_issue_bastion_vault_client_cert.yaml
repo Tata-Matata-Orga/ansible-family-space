@@ -5,7 +5,7 @@
 
 - name: Ensure temp Bastion Vault client TLS directory exists on primary Bastion server
   file:
-    path: "{{ bastion_tmp_tls_dir_for_vault_clients }}"
+    path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}"
     state: directory
     owner: root
     group: root
