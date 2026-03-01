@@ -139,6 +139,6 @@
     import_tasks: ../tasks/bootstrap-tls-vault-consul/33_distribute_tls_to_other_bastions.yaml
 
 # Reconfigure and restart Vault + Consul to use TLS
-- import_playbook: 40_reconfigure_consul_for_tls.yaml
-- import_playbook: 41_reconfigure_vault_for_tls.yaml
-- import_playbook: 90_verify_and_mark.yaml
+- import_playbook: ../tasks/bootstrap-tls-vault-consul/40_reconfigure_consul_for_tls.yaml
+- import_playbook: ../tasks/bootstrap-tls-vault-consul/41_reconfigure_vault_for_tls.yaml
+- import_playbook: ../tasks/bootstrap-tls-vault-consul/90_verify_and_mark.yaml
