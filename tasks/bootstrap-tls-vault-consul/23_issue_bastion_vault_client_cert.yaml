@@ -51,13 +51,16 @@
 ###############################################################################
 
 - name: Sign client TLS certificate with bootstrap CA
-  community.crypto.openssl_certificate:
+  community.crypto.x509_certificate:
     path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_cert_file }}"
     csr_path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/client.csr"
     provider: ownca
     ownca_path: "{{ bastion_ca_cert_path }}"
     ownca_privatekey_path: "{{ bastion_ca_key_path }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
+    owner: root
+    group: root
+    mode: "0644"
 
 ###############################################################################
 # Sanity checks
