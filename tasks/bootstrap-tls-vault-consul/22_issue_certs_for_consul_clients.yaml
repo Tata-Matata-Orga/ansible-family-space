@@ -8,7 +8,7 @@
 
 - name: Ensure client TLS directory exists on Bastion
   file:
-    path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}"
+    path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_host }}"
     state: directory
     owner: root
     group: root
@@ -20,7 +20,7 @@
 
 - name: Generate client TLS private key for Consul client
   community.crypto.openssl_privatekey:
-    path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_key_file }}"
+    path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_host }}/{{ consul_client_key_file }}"
     type: Ed25519
     owner: root
     group: root
@@ -33,7 +33,7 @@
 - name: Build client certificate SANs
   set_fact:
     client_tls_sans:
-    - "DNS:{{ client_name }}"
+    - "DNS:{{ client_host }}"
   changed_when: false
 
 ###############################################################################
@@ -42,10 +42,10 @@
 
 - name: Generate client TLS CSR
   community.crypto.openssl_csr:
-    path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/client.csr"
-    privatekey_path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_key_file }}"
+    path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_host }}/client.csr"
+    privatekey_path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_host }}/{{ consul_client_key_file }}"
     subject:
-      common_name: "{{ client_name }}"
+      common_name: "{{ client_host }}"
       organization_name: "consul-client"
     subject_alt_name: "{{ client_tls_sans }}"
 
@@ -55,8 +55,8 @@
 
 - name: Sign client TLS certificate with bootstrap CA
   community.crypto.x509_certificate:
-    path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_cert_file }}"
-    csr_path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/client.csr"
+    path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_host }}/{{ consul_client_cert_file }}"
+    csr_path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_host }}/client.csr"
     provider: ownca
     ownca_path: "{{ bastion_ca_cert_path }}"
     ownca_privatekey_path: "{{ bastion_ca_key_path }}"
@@ -74,12 +74,12 @@
     name: assert_paths
   vars:
     required_paths:
-    - path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_cert_file }}"
+    - path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_host }}/{{ consul_client_cert_file }}"
       type: file
       owner: root
       group: root
       mode: "0644"
-    - path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_key_file }}"
+    - path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_host }}/{{ consul_client_key_file }}"
       type: file
       owner: root
       group: root
