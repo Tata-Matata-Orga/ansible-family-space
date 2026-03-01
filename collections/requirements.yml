@@ -1,3 +1,5 @@
 collections:
   - name: ansible.posix
     version: ">=1.5.0"
+  - name: community.crypto
+    version: ">=2.0.0,<3.0.0" # for Ansible core 2.12.10+ and 2.13.5+; these versions of community.crypto are compatible with both Ansible core 2.12 and 2.13, which allows us to use the same requirements.yml for both Ansible versions in our CI pipelines; see
