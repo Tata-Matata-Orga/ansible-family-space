@@ -13,7 +13,7 @@
 ###############################################################################
 
 - name: Reconfigure and restart Consul to use TLS
-  hosts: vault
+  hosts: consul
   become: true
   gather_facts: false
   ###############################################################################
@@ -79,8 +79,8 @@
 # Post-flight sanity check
 ###############################################################################
 
-- name: Verify Consul service is running
-  systemd:
-    name: consul
-    state: started
-  changed_when: false
+  - name: Verify Consul service is running
+    systemd:
+      name: consul
+      state: started
+    changed_when: false
