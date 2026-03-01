@@ -41,9 +41,8 @@
   community.crypto.openssl_csr:
     path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/client.csr"
     privatekey_path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_key_file }}"
-    subject:
-      common_name: "{{ client_name }}"
-      organization_name: "consul-client"
+    common_name: "{{ client_name }}"
+    organization_name: "consul-client"
     subject_alt_name: "{{ client_tls_sans }}"
 
 ###############################################################################
