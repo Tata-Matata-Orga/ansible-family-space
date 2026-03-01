@@ -86,6 +86,7 @@
       Bootstrap TLS CA TTL is too long. This CA must be short-lived by design (<= 14 days).
 
 - name: Assert bootstrap CA files exist
+  become: true
   include_role:
     name: assert_paths
   vars:
