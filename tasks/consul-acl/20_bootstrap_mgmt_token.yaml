@@ -13,7 +13,7 @@
 
 # With the token we regain controlled access to the Consul API
 # we can create policies and tokens
-- hosts: "{{ bastion_primary_host }}"
+- hosts: bastion_primary
   become: true
   gather_facts: false
   tasks:

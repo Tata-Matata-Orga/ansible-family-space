@@ -19,14 +19,6 @@ dns_entries:
     - "{{ consul_service_name }}"
     - "{{ groups['consul_servers'][0] }}"
     
-#ensure single canonical bastion host in case of future HA setups and accidental multiple assignments of bastion_primary
-bastion_primary_host: >-
-  {{
-    groups['bastion']
-    | select('extract', hostvars, 'bastion_primary')
-    | list
-    | first
-  }}
 
 ### Common TLS paths used by both Vault and Consul ###
 

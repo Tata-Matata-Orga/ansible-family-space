@@ -23,7 +23,7 @@
     group: root
     mode: "0644"
     remote_src: yes
-  delegate_to: "{{ bastion_primary_host }}"
+  delegate_to: bastion_primary
 
 # Bastion to Consul auth certs
 ###############################################################################
@@ -49,7 +49,7 @@
     group: root
     mode: "0644"
     remote_src: yes
-  delegate_to: "{{ bastion_primary_host }}"
+  delegate_to: bastion_primary
 
 - name: Copy Bastion client private key from primary Bastion to this Bastion
   copy:
@@ -59,7 +59,7 @@
     group: root
     mode: "0600"
     remote_src: yes
-  delegate_to: "{{ bastion_primary_host }}"
+  delegate_to: bastion_primary
 
 ###############################################################################
 #  Bastion → Vault
@@ -88,7 +88,7 @@
     group: root
     mode: "0644"
     remote_src: yes
-  delegate_to: "{{ bastion_primary_host }}"
+  delegate_to: bastion_primary
 
 - name: Copy Bastion Vault client private key
   copy:
@@ -98,7 +98,7 @@
     group: root
     mode: "0600"
     remote_src: yes
-  delegate_to: "{{ bastion_primary_host }}"
+  delegate_to: bastion_primary
 
 ###############################################################################
 # Sanity checks

@@ -55,7 +55,7 @@
 # client certs for Bastion → Consul mTLS (per Bastion host) on Bastion and distribute to Bastion
 # client certs for Bastion → Vault mTLS (per Bastion host) on Bastion and distribute to Bastion 
 - name: Generate "bootstrap" TLS CA and Vault-Consul-Bastion certs
-  hosts: "{{ bastion_primary_host }}"
+  hosts: bastion_primary
   connection: local
   gather_facts: false
   become: true

@@ -9,7 +9,7 @@
 # Consul servers have exactly the permissions they need, can read catalog but not write arbitrary KV
 
 - name: Verify Consul ACLs from Bastion
-  hosts: "{{ bastion_primary_host }}"
+  hosts: bastion_primary
   become: true
   gather_facts: false
 

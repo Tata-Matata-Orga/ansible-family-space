@@ -6,7 +6,7 @@
 
 # Attach policies explicitly.
 
-- hosts: "{{ bastion_primary_host }}"
+- hosts: bastion_primary
   become: true
   gather_facts: false
   tasks:

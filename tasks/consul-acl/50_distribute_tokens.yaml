@@ -6,7 +6,7 @@
 # Vault reads the token once at startup, keeps it in memory, uses it to write KV, create sessions
 
 - name: Retrieve Consul ACL tokens from files on Bastion and store into facts
-  hosts: "{{ bastion_primary_host }}"
+  hosts: bastion_primary
   gather_facts: false
   become: true
   tasks:
@@ -34,7 +34,7 @@
   become: true
 
   vars:
-    consul_server_agent_token: "{{ hostvars[bastion_primary_host].consul_server_agent_token }}"
+    consul_server_agent_token: "{{ hostvars[bastion_primary].consul_server_agent_token }}"
 
   tasks:
   - name: Install Consul agent token
@@ -63,7 +63,7 @@
   become: true
 
   vars:
-    vault_consul_token: "{{ hostvars[bastion_primary_host].vault_consul_token }}"
+    vault_consul_token: "{{ hostvars[bastion_primary].vault_consul_token }}"
 
   tasks:
   - name: Install Vault Consul storage config
