@@ -83,21 +83,21 @@
 
   # Client cert issuance Vault (client) --> Consul (server) (per Vault host)
   - name: Issue Vault client TLS certificates (Vault → Consul)
-    include_tasks: 22_issue_certs_for_consul_clients.yaml
+    include_tasks: ../tasks/bootstrap-tls-vault-consul/22_issue_certs_for_consul_clients.yaml
     loop: "{{ groups['vault'] }}"
     loop_control:
       loop_var: client_host
 
   # Client cert issuance Bastion (client) --> Consul (server)  (per Bastion host)
   - name: Issue Bastion client TLS certificate (Bastion → Consul)
-    include_tasks: 22_issue_certs_for_consul_clients.yaml
+    include_tasks: ../tasks/bootstrap-tls-vault-consul/22_issue_certs_for_consul_clients.yaml
     loop: "{{ groups['bastion'] }}"
     loop_control:
       loop_var: client_host
 
   # Client cert issuance Bastion --> Vault (per Bastion host)
   - name: Issue Bastion client certificate for Vault mTLS
-    include_tasks: 23_issue_bastion_vault_client_cert.yaml
+    include_tasks: ../tasks/bootstrap-tls-vault-consul/23_issue_bastion_vault_client_cert.yaml
     loop: "{{ groups['bastion'] }}"
     loop_control:
       loop_var: bastion_host
