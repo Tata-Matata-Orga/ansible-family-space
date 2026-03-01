@@ -45,7 +45,7 @@
 ###############################################################################
 
 - name: Generate bootstrap TLS CA certificate
-  community.crypto.openssl_certificate:
+  community.crypto.x509_certificate:
     path: "{{ bastion_ca_cert_path }}"
     privatekey_path: "{{ bastion_ca_key_path }}"
     provider: selfsigned
