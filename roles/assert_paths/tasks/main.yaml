@@ -6,15 +6,29 @@
   register: path_stats
   changed_when: false
 
+- name: Build list of paths that fail checks
+  set_fact:
+    assert_paths_bad: "{{ (assert_paths_bad | default([])) + [r] }}"
+  loop: "{{ path_stats.results }}"
+  loop_control:
+    loop_var: r
+  when: >
+    (not (r.stat.exists | bool))
+    or (r.item.type == 'file' and not (r.stat.isreg | bool))
+    or (r.item.type == 'directory' and not (r.stat.isdir | bool))
+    or (r.item.owner is defined and r.stat.pw_name != r.item.owner)
+    or (r.item.group is defined and r.stat.gr_name != r.item.group)
+    or (r.item.mode is defined and r.stat.mode != r.item.mode)
+  changed_when: false
+
 - name: Assert required paths exist with correct type and permissions
   assert:
     that:
-      - (path_stats.results | selectattr('stat.exists', 'equalto', false) | list | length) == 0
-      - (path_stats.results | selectattr('item.type', 'equalto', 'file') | selectattr('stat.isreg', 'equalto', false) | list | length) == 0
-      - (path_stats.results | selectattr('item.type', 'equalto', 'directory') | selectattr('stat.isdir', 'equalto', false) | list | length) == 0
-      - (path_stats.results | selectattr('item.owner', 'defined') | rejectattr('stat.pw_name', 'equalto', item.owner) | list | length) == 0
-      - (path_stats.results | selectattr('item.group', 'defined') | rejectattr('stat.gr_name', 'equalto', item.group) | list | length) == 0
-      - (path_stats.results | selectattr('item.mode', 'defined') | rejectattr('stat.mode', 'equalto', item.mode) | list | length) == 0
+      - (assert_paths_bad | default([]) | length) == 0
     fail_msg: >-
-      One or more required paths are missing or have wrong type/ownership/mode.
-      Details: {{ path_stats.results }}
+      Required paths check failed.
+      Bad entries: {{
+        (assert_paths_bad | default([]))
+        | map(attribute='item')
+        | list
+      }}
