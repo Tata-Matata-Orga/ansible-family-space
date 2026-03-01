@@ -70,7 +70,7 @@
   include_role:
     name: assert_paths
   vars:
-    requred_paths:
+    required_paths:
     - path: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ client_name }}/{{ consul_client_cert_file }}"
       type: file
       owner: root

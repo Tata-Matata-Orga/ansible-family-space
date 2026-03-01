@@ -96,7 +96,7 @@
   include_role:
     name: assert_paths
   vars:
-    requred_paths:
+    required_paths:
     - path: "{{ vault_ca_cert_path }}"
       type: file
       owner: root

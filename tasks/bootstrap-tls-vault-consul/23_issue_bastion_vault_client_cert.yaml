@@ -67,7 +67,7 @@
   include_role:
     name: assert_paths
   vars:
-    requred_paths:
+    required_paths:
     - path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_cert_file }}"
       type: file
       owner: root
