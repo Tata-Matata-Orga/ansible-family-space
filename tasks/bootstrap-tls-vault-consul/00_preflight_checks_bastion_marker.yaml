@@ -4,6 +4,7 @@
 # It would mean that bootstrap TLS has already been applied
 ######################################################################################
 - name: Check if bootstrap TLS marker exists on Bastion
+  become: true
   stat:
     path: "{{ bastion_tls_dir }}/BOOTSTRAP_COMPLETE"
   register: bootstrap_marker
