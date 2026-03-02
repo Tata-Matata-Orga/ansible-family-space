@@ -9,7 +9,7 @@
 
 - name: Ensure Bastion TLS directory exists
   file:
-    path: "{{ bastion_tls_dir }}"
+    path: "{{ bastion_ca_cert_path | dirname }}"
     state: directory
     owner: root
     group: root
@@ -35,7 +35,7 @@
 
 - name: Ensure TLS directory for Consul client certs exists on Bastion
   file:
-    path: "{{ bastion_client_auth_to_consul_certs_dir }}"
+    path: "{{ bastion_client_auth_to_consul_cert_path | dirname }}"
     state: directory
     owner: root
     group: root
@@ -74,7 +74,7 @@
 
 - name: Ensure Bastion TLS directory exists
   file:
-    path: "{{ bastion_client_auth_to_vault_certs_dir }}"
+    path: "{{ bastion_client_auth_to_vault_cert_path | dirname }}"
     state: directory
     owner: root
     group: root

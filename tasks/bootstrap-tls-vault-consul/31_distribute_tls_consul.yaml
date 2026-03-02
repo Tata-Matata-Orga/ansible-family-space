@@ -9,7 +9,7 @@
 
 - name: Ensure Consul TLS directory exists
   file:
-    path: "{{ consul_tls_dir }}"
+    path: "{{ consul_ca_cert_path | dirname }}"
     state: directory
     owner: consul
     group: consul

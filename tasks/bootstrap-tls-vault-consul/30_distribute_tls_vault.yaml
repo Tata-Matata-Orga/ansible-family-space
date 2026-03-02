@@ -13,7 +13,7 @@
 
 - name: Ensure Vault TLS directory exists
   file:
-    path: "{{ vault_tls_dir }}"
+    path: "{{ vault_ca_cert_path | dirname }}"
     state: directory
     owner: vault
     group: vault
@@ -62,7 +62,7 @@
 
 - name: Ensure Vault directory for Consul client certs exists
   file:
-    path: "{{ vault_client_auth_to_consul_certs_dir }}"
+    path: "{{ vault_client_auth_to_consul_cert_path | dirname }}"
     state: directory
     owner: vault
     group: vault
