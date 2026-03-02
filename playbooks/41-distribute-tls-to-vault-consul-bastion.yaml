@@ -39,6 +39,8 @@
     block:
     - import_tasks: ../tasks/bootstrap-tls-vault-consul/00_preflight_checks_bastion_marker.yaml
 
+
+## DISTRIBUTE TLS MATERIAL TO VAULT + CONSUL + BASTION
 - name: Copy Vault TLS material from Bastion to Vault
   hosts: vault
   gather_facts: true

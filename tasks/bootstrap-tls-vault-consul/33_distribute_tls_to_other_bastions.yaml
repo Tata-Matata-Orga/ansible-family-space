@@ -7,13 +7,20 @@
 ## CA cert from primary Bastion to all Bastion hosts
 ###############################################################################
 
-- name: Ensure Bastion TLS directory exists
+- name: Ensure TLS directories for auth to Consul as client exist on this Bastion 
   file:
-    path: "{{ bastion_ca_cert_path | dirname }}"
+    path: "{{ item.path }}"
     state: directory
     owner: root
     group: root
-    mode: "0700"
+    mode: "{{ item.mode | default('0755') }}"
+  loop:
+    - path: "{{ bastion_ca_cert_path | dirname }}"
+      mode: "0755"
+    - path: "{{ bastion_client_auth_to_consul_cert_path | dirname }}"
+      mode: "0755"
+    - path: "{{ bastion_client_auth_to_vault_cert_path | dirname }}"
+      mode: "0755"
 
 - name: Copy CA certificate from primary Bastion to this Bastion
   copy:
@@ -30,14 +37,6 @@
 # export CONSUL_CLIENT_CERT={{ bastion_client_auth_to_consul_cert_path }}
 # export CONSUL_CLIENT_KEY={{ bastion_client_auth_to_consul_key_path }}
 ###############################################################################
-
-- name: Ensure TLS directory for Consul client certs exists on Bastion
-  file:
-    path: "{{ bastion_client_auth_to_consul_cert_path | dirname }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0700"
 
 - name: Copy Bastion client certificate from primary Bastion to this Bastion
   copy:
@@ -65,14 +64,6 @@
 # export VAULT_CLIENT_CERT={{ bastion_client_auth_to_vault_cert_path }}
 # export VAULT_CLIENT_KEY={{ bastion_client_auth_to_vault_key_path }}
 ###############################################################################
-
-- name: Ensure Bastion TLS directory exists
-  file:
-    path: "{{ bastion_client_auth_to_vault_cert_path | dirname }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0700"
 
 - name: Copy Bastion Vault client certificate from primary Bastion to this Bastion
   copy:
@@ -127,7 +118,7 @@
       type: folder
       owner: root
       group: root
-      mode: "0700"
+      mode: "0755"
     - path: "{{ bastion_client_auth_to_vault_cert_path }}"
       type: file
       owner: root

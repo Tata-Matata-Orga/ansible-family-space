@@ -20,8 +20,8 @@
   # we run Ansible on Bastion, so src is local path on Bastion (controller), dest is path on Consul
     src: "{{ bastion_ca_cert_path }}"
     dest: "{{ consul_ca_cert_path }}"
-    owner: root
-    group: root
+    owner: consul
+    group: consul
     mode: "0644"
 
 ###############################################################################
@@ -57,16 +57,16 @@
     required_paths:
     - path: "{{ consul_server_cert_path }}"
       type: file
-      owner: root
-      group: root
+      owner: consul
+      group: consul
       mode: "0644"
     - path: "{{ consul_server_key_path }}"
       type: file
-      owner: root
-      group: root
+      owner: consul
+      group: consul
       mode: "0600"
     - path: "{{ consul_ca_cert_path }}"
       type: file
-      owner: root
-      group: root
+      owner: consul
+      group: consul
       mode: "0644"
