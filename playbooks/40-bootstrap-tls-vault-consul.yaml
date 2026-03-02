@@ -1,3 +1,5 @@
+### Bootstrap TLS (phase 1)
+
 ### Temporary bootstrap of TLS for Vault + Consul + Bastion
 ### Objective: enable TLS on Vault + Consul after initial setup, before Vault initialization
 ### Once Vault is initialized, it will issue long-lived TLS certs for itself + Consul
@@ -10,19 +12,7 @@
 # - Generate: Bastion client key + cert to authenticate Bastion to Consul (Bastion → Consul mTLS)
 # - Generate: Bastion client key + cert to authenticate Bastion to Vault (Bastion → Vault mTLS)
 
-##### On Vault
-# - Install TLS material generated on Bastion
-#   - CA certificate to validate client certs
-#   - Vault server certificate + private key
-#   - Vault client certificate + private key (for Vault → Consul mTLS)
-# - Rewrite Vault config: listener → HTTPS, api_addr → HTTPS
-# - Restart Vault
 
-#### On Consul
-# Install TLS material generated on Bastion
-#   - CA certificate to validate client certs
-#   - Consul server certificate + private key
-# Rewrite Consul config: HTTP → HTTPS (API), Restart Consul
 
 # Should fail if Vault already has TLS enabled
 # The playbook must never be rerun after TLS bootstrap is completed
@@ -56,7 +46,6 @@
 # client certs for Bastion → Vault mTLS (per Bastion host) on Bastion and distribute to Bastion 
 - name: Generate "bootstrap" TLS CA and Vault-Consul-Bastion certs
   hosts: bastion_primary
-  connection: local
   gather_facts: false
   become: true
   vars_files:
@@ -101,44 +90,3 @@
     loop: "{{ groups['bastion'] }}"
     loop_control:
       loop_var: bastion_host
-
-# Distribute Vault TLS material from Bastion to Vault
-- name: Copy Vault TLS material from Bastion to Vault
-  hosts: vault
-  gather_facts: true
-  become: true
-  vars_files:
-  - ../vars/bootstrap-tls-vault-consul.yaml
-
-  tasks:
-  - name: Copy Vault TLS material from Bastion to Vault
-    import_tasks: ../tasks/bootstrap-tls-vault-consul/30_distribute_tls_vault.yaml
-
-# Distribute Consul TLS material from Bastion to Consul
-- name: Copy Consul TLS material from Bastion to Consul
-  hosts: consul
-  gather_facts: true
-  become: true
-  vars_files:
-  - ../vars/bootstrap-tls-vault-consul.yaml
-
-  tasks:
-  - name: Copy Consul TLS material from Bastion to Consul
-    import_tasks: ../tasks/bootstrap-tls-vault-consul/31_distribute_tls_consul.yaml
-
-# Install Bastion client TLS material for Consul mTLS on each Bastion host
-- name: Install Bastion client TLS material for Consul and Vault on each Bastion host
-  hosts: bastion
-  gather_facts: true
-  become: true
-  vars_files:
-  - ../vars/bootstrap-tls-vault-consul.yaml
-
-  tasks:
-  - name: Install Bastion client certificate for Consul mTLS
-    import_tasks: ../tasks/bootstrap-tls-vault-consul/33_distribute_tls_to_other_bastions.yaml
-
-# Reconfigure and restart Vault + Consul to use TLS
-- import_playbook: ../tasks/bootstrap-tls-vault-consul/40_reconfigure_consul_for_tls.yaml
-- import_playbook: ../tasks/bootstrap-tls-vault-consul/41_reconfigure_vault_for_tls.yaml
-- import_playbook: ../tasks/bootstrap-tls-vault-consul/90_verify_and_mark.yaml

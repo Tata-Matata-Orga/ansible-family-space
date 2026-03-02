@@ -15,39 +15,36 @@
     group: consul
     mode: "0750"
 
-- name: Copy CA certificate to Consul
+- name: Copy CA certificate to Consul from Bastion
   copy:
+  # we run Ansible on Bastion, so src is local path on Bastion (controller), dest is path on Consul
     src: "{{ bastion_ca_cert_path }}"
     dest: "{{ consul_ca_cert_path }}"
     owner: root
     group: root
     mode: "0644"
-    remote_src: yes
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 # Distribute Consul server certificate & key
 ###############################################################################
 
-- name: Copy Consul TLS certificate
+- name: Copy Consul TLS certificate from Bastion to Consul
   copy:
+  # we run Ansible on Bastion, so src is local path on Bastion (controller), dest is path on Consul
     src: "{{ bastion_tmp_tls_dir_for_consul }}/{{ inventory_hostname }}/{{consul_server_cert_file}}"
     dest: "{{ consul_server_cert_path }}"
     owner: consul
     group: consul
     mode: "0644"
-    remote_src: yes
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
-- name: Copy Consul TLS private key
+- name: Copy Consul TLS private key from Bastion to Consul
   copy:
+  # we run Ansible on Bastion, so src is local path on Bastion (controller), dest is path on Consul
     src: "{{ bastion_tmp_tls_dir_for_consul }}/{{ inventory_hostname }}/{{consul_server_key_file}}"
     dest: "{{ consul_server_key_path }}"
     owner: consul
     group: consul
     mode: "0600"
-    remote_src: yes
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 # Sanity checks

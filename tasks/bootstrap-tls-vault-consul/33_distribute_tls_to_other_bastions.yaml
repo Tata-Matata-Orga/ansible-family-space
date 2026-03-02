@@ -22,8 +22,6 @@
     owner: root
     group: root
     mode: "0644"
-    remote_src: yes
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 # Bastion to Consul auth certs
 ###############################################################################
@@ -48,8 +46,6 @@
     owner: root
     group: root
     mode: "0644"
-    remote_src: yes
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 - name: Copy Bastion client private key from primary Bastion to this Bastion
   copy:
@@ -58,8 +54,6 @@
     owner: root
     group: root
     mode: "0600"
-    remote_src: yes
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 #  Bastion → Vault
@@ -80,25 +74,21 @@
     group: root
     mode: "0700"
 
-- name: Copy Bastion Vault client certificate
+- name: Copy Bastion Vault client certificate from primary Bastion to this Bastion
   copy:
     src: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ inventory_hostname }}/{{ vault_client_cert_file }}"
     dest: "{{ bastion_client_auth_to_vault_cert_path }}"
     owner: root
     group: root
     mode: "0644"
-    remote_src: yes
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
-- name: Copy Bastion Vault client private key
+- name: Copy Bastion Vault client private key from primary Bastion to this Bastion
   copy:
     src: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ inventory_hostname }}/{{ vault_client_key_file }}"
     dest: "{{ bastion_client_auth_to_vault_key_path }}"
     owner: root
     group: root
     mode: "0600"
-    remote_src: yes
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 # Sanity checks

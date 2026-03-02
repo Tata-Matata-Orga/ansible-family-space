@@ -22,39 +22,37 @@
 ###############################################################################
 # Distribute CA certificate from primary Bastion to Vault
 ###############################################################################
-- name: Copy CA certificate to Vault
+
+- name: Copy CA certificate from Bastion to Vault
   copy:
+    # we run Ansible on Bastion, so src is local path on Bastion (controller), dest is path on Vault
     src: "{{ bastion_ca_cert_path }}"
     dest: "{{ vault_ca_cert_path}}"
     owner: root
     group: root
     mode: "0644"
-    remote_src: yes # The source file lives on the delegated host, not the target
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 # Distribute Vault server certificate & key  from primary Bastion to Vault
 ###############################################################################
 
-- name: Copy Vault TLS certificate
+- name: Copy Vault TLS certificate from Bastion to Vault
   copy:
+  # we run Ansible on Bastion, so src is local path on Bastion (controller), dest is path on Vault
     src: "{{ bastion_tmp_tls_dir_for_vault }}/{{ inventory_hostname }}/{{vault_server_cert_file}}"
     dest: "{{ vault_server_cert_path }}"
     owner: vault
     group: vault
     mode: "0644"
-    remote_src: yes
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
-- name: Copy Vault TLS private key
+- name: Copy Vault TLS private key from Bastion to Vault
   copy:
+  # we run Ansible on Bastion, so src is local path on Bastion (controller), dest is path on Vault
     src: "{{ bastion_tmp_tls_dir_for_vault }}/{{ inventory_hostname }}/{{vault_server_key_file}}"
     dest: "{{ vault_server_key_path }}"
     owner: vault
     group: vault
     mode: "0600"
-    remote_src: yes
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 # Distribute Vault client certificate & key (used for auth to Consul)  from primary Bastion to Vault
@@ -70,23 +68,21 @@
 
 - name: Copy Vault client certificate generated for auth to Consul from Bastion to Vault
   copy:
+  # we run Ansible on Bastion, so src is local path on Bastion (controller), dest is path on Vault
     src: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ inventory_hostname }}/{{consul_client_cert_file}}"
     dest: "{{ vault_client_auth_to_consul_cert_path }}"
     owner: vault
     group: vault
     mode: "0644"
-    remote_src: yes
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 - name: Copy Vault client private key
   copy:
+  # we run Ansible on Bastion, so src is local path on Bastion (controller), dest is path on Vault
     src: "{{ bastion_tmp_tls_dir_for_consul_clients }}/{{ inventory_hostname }}/{{consul_client_key_file}}"
     dest: "{{ vault_client_auth_to_consul_key_path }}"
     owner: vault
     group: vault
     mode: "0600"
-    remote_src: yes
-  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 # Sanity checks on Vault
