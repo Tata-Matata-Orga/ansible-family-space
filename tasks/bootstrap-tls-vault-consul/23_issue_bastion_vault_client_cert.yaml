@@ -66,8 +66,8 @@
     ownca_path: "{{ bastion_ca_cert_path }}"
     ownca_privatekey_path: "{{ bastion_ca_key_path }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
-    owner: root
-    group: root
+    owner: ansible
+    group: ansible
     mode: "0644"
 
 ###############################################################################
