@@ -23,7 +23,7 @@
     group: root
     mode: "0644"
     remote_src: yes
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 # Bastion to Consul auth certs
 ###############################################################################
@@ -49,7 +49,7 @@
     group: root
     mode: "0644"
     remote_src: yes
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 - name: Copy Bastion client private key from primary Bastion to this Bastion
   copy:
@@ -59,7 +59,7 @@
     group: root
     mode: "0600"
     remote_src: yes
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 #  Bastion → Vault
@@ -88,7 +88,7 @@
     group: root
     mode: "0644"
     remote_src: yes
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 - name: Copy Bastion Vault client private key
   copy:
@@ -98,7 +98,7 @@
     group: root
     mode: "0600"
     remote_src: yes
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 # Sanity checks

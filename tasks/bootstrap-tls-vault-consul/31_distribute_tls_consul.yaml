@@ -23,7 +23,7 @@
     group: root
     mode: "0644"
     remote_src: yes
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 # Distribute Consul server certificate & key
@@ -37,7 +37,7 @@
     group: consul
     mode: "0644"
     remote_src: yes
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 - name: Copy Consul TLS private key
   copy:
@@ -47,7 +47,7 @@
     group: consul
     mode: "0600"
     remote_src: yes
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 # Sanity checks

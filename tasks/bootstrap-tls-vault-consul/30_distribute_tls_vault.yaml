@@ -30,7 +30,7 @@
     group: root
     mode: "0644"
     remote_src: yes # The source file lives on the delegated host, not the target
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 # Distribute Vault server certificate & key  from primary Bastion to Vault
@@ -44,7 +44,7 @@
     group: vault
     mode: "0644"
     remote_src: yes
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 - name: Copy Vault TLS private key
   copy:
@@ -54,7 +54,7 @@
     group: vault
     mode: "0600"
     remote_src: yes
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 # Distribute Vault client certificate & key (used for auth to Consul)  from primary Bastion to Vault
@@ -76,7 +76,7 @@
     group: vault
     mode: "0644"
     remote_src: yes
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 - name: Copy Vault client private key
   copy:
@@ -86,7 +86,7 @@
     group: vault
     mode: "0600"
     remote_src: yes
-  delegate_to: bastion_primary
+  delegate_to: "{{ groups['bastion_primary'][0] }}" # delegate_to must be an inventory hostname, not a group
 
 ###############################################################################
 # Sanity checks on Vault
