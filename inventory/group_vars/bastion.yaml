@@ -1,10 +1,3 @@
-# Directory on Bastion hosts where client certificates for Bastion to auth to Consul and Vault are stored
-bastion_tls_dir: /etc/tls
-
-# CA
-bastion_ca_cert_path: "{{ bastion_tls_dir }}/{{ ca_cert_file}}"
-bastion_ca_key_path: "{{ bastion_tls_dir }}/{{ ca_key_file}}"
-
 # Bastion auths as client to Vault
 bastion_client_auth_to_vault_certs_dir: "{{ bastion_tls_dir }}/vault-client"
 bastion_client_auth_to_vault_cert_path: "{{ bastion_client_auth_to_vault_certs_dir }}/{{ vault_client_cert_file }}"

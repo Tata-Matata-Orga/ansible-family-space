@@ -25,6 +25,11 @@ dns_entries:
 ca_cert_file: ca.pem
 ca_key_file: ca.key
 
+# Directory on Bastion hosts where client certificates for Bastion to auth to Consul and Vault are stored
+bastion_tls_dir: /etc/tls
+bastion_ca_cert_path: "{{ bastion_tls_dir }}/{{ ca_cert_file}}"
+bastion_ca_key_path: "{{ bastion_tls_dir }}/{{ ca_key_file}}"
+
 consul_client_key_file: consul-client.key
 consul_client_cert_file: consul-client.pem
 consul_server_key_file: consul.key
