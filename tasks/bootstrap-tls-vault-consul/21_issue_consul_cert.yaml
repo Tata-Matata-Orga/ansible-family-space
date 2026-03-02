@@ -3,13 +3,21 @@
 #
 ###############################################################################
 
-- name: Ensure tmp Consul TLS directory exists on Bastion
+- name: Ensure root Consul TLS directory exists on Bastion
+  file:
+    path: "{{ bastion_tmp_tls_dir_for_consul }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure Consul TLS directory for this Consul exists on Bastion
   file:
     path: "{{ bastion_tmp_tls_dir_for_consul }}/{{ consul_host }}"
     state: directory
     owner: root
     group: root
-    mode: "0700"
+    mode: "0755"
 
 ###############################################################################
 # Consul private key
