@@ -27,8 +27,8 @@
   community.crypto.openssl_privatekey:
     path: "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/{{vault_server_key_file}}"
     type: Ed25519
-    owner: root
-    group: root
+    owner: ansible
+    group: ansible
     mode: "0600"
 
 ###############################################################################
@@ -67,8 +67,8 @@
     ownca_path: "{{ bastion_ca_cert_path }}"
     ownca_privatekey_path: "{{ bastion_ca_key_path }}"
     ownca_not_after: "+{{ bootstrap_ca_ttl_days }}d"
-    owner: root
-    group: root
+    owner: ansible
+    group: ansible
     mode: "0644"
 
 ###############################################################################
@@ -82,11 +82,11 @@
     required_paths:
     - path: "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/{{vault_server_cert_file}}"
       type: file
-      owner: root
-      group: root
+      owner: ansible
+      group: ansible
       mode: "0644"
     - path: "{{ bastion_tmp_tls_dir_for_vault  }}/{{ vault_host }}/{{vault_server_key_file}}"
       type: file
-      owner: root
-      group: root
+      owner: ansible
+      group: ansible
       mode: "0600"

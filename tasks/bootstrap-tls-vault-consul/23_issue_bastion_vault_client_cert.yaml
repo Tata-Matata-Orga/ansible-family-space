@@ -3,13 +3,22 @@
 # For Bastion to authenticate to Vault API via mTLS as client
 ###############################################################################
 
-- name: Ensure temp Bastion Vault client TLS directory exists on primary Bastion server
+
+- name: Ensure tmp client TLS directories exist on Bastion (Bastion is client to Vault)
   file:
-    path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}"
+    path: "{{ item.path }}"
     state: directory
     owner: root
     group: root
-    mode: "0700"
+    mode: "{{ item.mode | default('0755') }}"
+  loop:
+    - path: "{{ bastion_tmp_tls_dir }}"
+      mode: "0755"
+    - path: "{{ bastion_tmp_tls_dir_for_vault_clients }}"
+      mode: "0755"
+    - path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}"
+      mode: "0755"
+
 
 ###############################################################################
 # Private key
@@ -19,8 +28,8 @@
   community.crypto.openssl_privatekey:
     path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_key_file }}"
     type: Ed25519
-    owner: root
-    group: root
+    owner: ansible
+    group: ansible
     mode: "0600"
 
 ###############################################################################
@@ -72,11 +81,11 @@
     required_paths:
     - path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_cert_file }}"
       type: file
-      owner: root
-      group: root
+      owner: ansible
+      group: ansible
       mode: "0644"
     - path: "{{ bastion_tmp_tls_dir_for_vault_clients }}/{{ bastion_host }}/{{ vault_client_key_file }}"
       type: file
-      owner: root
-      group: root
+      owner: ansible
+      group: ansible
       mode: "0600"
