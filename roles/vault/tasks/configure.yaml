@@ -4,5 +4,5 @@
     dest: "{{ vault_config_dir }}/vault.hcl"
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
-    mode: "0640"
+    mode: "0644"
 

@@ -5,4 +5,4 @@
     dest: "{{ consul_config_dir }}/consul.hcl"
     owner: "{{ consul_user }}"
     group: "{{ consul_group }}"
-    mode: "0640"
+    mode: "0644"
