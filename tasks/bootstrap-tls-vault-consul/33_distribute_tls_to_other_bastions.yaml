@@ -93,7 +93,7 @@
       type: folder
       owner: root
       group: root
-      mode: "0700"
+      mode: "0755"
     - path: "{{ bastion_ca_cert_path }}"
       type: file
       owner: root
@@ -103,7 +103,7 @@
       type: folder
       owner: root
       group: root
-      mode: "0700"
+      mode: "0755"
     - path: "{{ bastion_client_auth_to_consul_cert_path }}"
       type: file
       owner: root
